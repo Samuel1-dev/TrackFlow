@@ -1,0 +1,186 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum BudgetPeriodType {
+  WEEKLY
+  MONTHLY
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  timezone     String         @default("UTC")
+  currency     String         @default("XOF")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  tasks        Task[]
+  projects     Project[]
+  budgets      Budget[]
+  expenses     Expense[]
+  timeLogs     TimeLog[]
+  categories   ExpenseCategory[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  userId      String
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  status      ProjectStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model Task {
+  id               String        @id @default(uuid())
+  userId           String
+  projectId        String?
+  parentTaskId     String?
+  title            String
+  description      String?
+  status           TaskStatus    @default(TODO)
+  priority         TaskPriority  @default(NORMAL)
+  startDate        DateTime?
+  dueDate          DateTime?
+  completedAt      DateTime?
+  estimatedMinutes Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project          Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  parentTask       Task?         @relation("SubTasks", fields: [parentTaskId], references: [id], onDelete: Cascade)
+  subTasks         Task[]        @relation("SubTasks")
+
+  dependencies     TaskDependency[] @relation("TaskBlockedBy")
+  dependentOnMe    TaskDependency[] @relation("TaskBlocking")
+
+  timeLogs         TimeLog[]
+
+  @@index([userId])
+  @@index([projectId])
+  @@index([dueDate])
+  @@index([status])
+  @@map("tasks")
+}
+
+model TaskDependency {
+  id              String   @id @default(uuid())
+  taskId          String
+  dependsOnTaskId String
+
+  task            Task     @relation("TaskBlockedBy", fields: [taskId], references: [id], onDelete: Cascade)
+  dependsOnTask   Task     @relation("TaskBlocking", fields: [dependsOnTaskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, dependsOnTaskId])
+  @@map("task_dependencies")
+}
+
+model TimeLog {
+  id              String    @id @default(uuid())
+  userId          String
+  taskId          String
+  durationMinutes Int
+  startedAt       DateTime
+  endedAt         DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([taskId])
+  @@map("time_logs")
+}
+
+model Budget {
+  id            String           @id @default(uuid())
+  userId        String
+  periodType    BudgetPeriodType
+  startDate     DateTime
+  endDate       DateTime
+  initialAmount Decimal          @db.Decimal(14, 2)
+  savingsTarget Decimal          @db.Decimal(14, 2)
+  currency      String           @default("XOF")
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, periodType, startDate])
+  @@index([userId, startDate, endDate])
+  @@map("budgets")
+}
+
+model ExpenseCategory {
+  id        String    @id @default(uuid())
+  userId    String?
+  name      String
+  icon      String?
+  color     String?
+  createdAt DateTime  @default(now())
+
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses  Expense[]
+
+  @@unique([userId, name])
+  @@map("expense_categories")
+}
+
+model Expense {
+  id          String          @id @default(uuid())
+  userId      String
+  categoryId  String
+  amount      Decimal         @db.Decimal(14, 2)
+  date        DateTime
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    ExpenseCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@index([userId, date])
+  @@map("expenses")
+}
