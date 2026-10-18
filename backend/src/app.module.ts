@@ -5,6 +5,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { TimeTrackingModule } from './modules/time-tracking/time-tracking.module';
+import { FinanceModule } from './modules/finance/finance.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -21,6 +26,11 @@ import { UsersModule } from './modules/users/users.module';
     PrismaModule,
     AuthModule,
     UsersModule,
+    ProjectsModule,
+    TasksModule,
+    TimeTrackingModule,
+    FinanceModule,
+    DashboardModule,
   ],
   providers: [
     {
