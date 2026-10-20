@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { TaskSelectionService } from '../core/services/task-selection.service';
 import { TasksService } from '../core/services/tasks.service';
 import { ProjectsService } from '../core/services/projects.service';
@@ -377,15 +377,22 @@ export class MainLayoutComponent {
     private tasksService: TasksService,
     private projectsService: ProjectsService,
     private financeService: FinanceService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.loadDependencies();
   }
 
   loadDependencies() {
-    this.projectsService.findAll().subscribe((res) => (this.projects = res));
+    this.projectsService.findAll().subscribe((res) => {
+      this.projects = res;
+      this.cdr.detectChanges();
+    });
     this.financeService.getCategories().subscribe((res) => {
       this.categories = res;
-      if (res.length > 0) this.newExpense.categoryId = res[0].id;
+      if (res.length > 0 && !this.newExpense.categoryId) {
+        this.newExpense.categoryId = res[0].id;
+      }
+      this.cdr.detectChanges();
     });
   }
 
@@ -403,9 +410,11 @@ export class MainLayoutComponent {
       .subscribe({
         next: (created) => {
           this.taskSelectionService.closeCreateTask();
+          this.taskSelectionService.notifyTaskCreated(created);
           this.taskSelectionService.selectTask(created);
           this.newTask.title = '';
           this.newTask.description = '';
+          this.cdr.detectChanges();
         },
         error: (err) => alert(err.error?.message || 'Erreur lors de la création'),
       });
@@ -421,9 +430,11 @@ export class MainLayoutComponent {
         description: this.newExpense.description,
       })
       .subscribe({
-        next: () => {
+        next: (created) => {
           this.taskSelectionService.closeCreateExpense();
-          window.location.reload();
+          this.taskSelectionService.notifyExpenseCreated(created);
+          this.newExpense.description = '';
+          this.cdr.detectChanges();
         },
         error: (err) => alert(err.error?.message || 'Erreur lors de la dépense'),
       });
@@ -440,9 +451,10 @@ export class MainLayoutComponent {
         savingsTarget: this.newBudget.savingsTarget,
       })
       .subscribe({
-        next: () => {
+        next: (created) => {
           this.taskSelectionService.closeCreateBudget();
-          window.location.reload();
+          this.taskSelectionService.notifyBudgetCreated(created);
+          this.cdr.detectChanges();
         },
         error: (err) => alert(err.error?.message || 'Erreur lors du budget'),
       });

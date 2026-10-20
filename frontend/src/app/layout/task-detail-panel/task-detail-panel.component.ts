@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
 import { TasksService } from '../../core/services/tasks.service';
 import { FinanceService } from '../../core/services/finance.service';
@@ -274,16 +275,36 @@ import { ActiveBudget } from '../../core/models/finance.models';
     </aside>
   `,
 })
-export class TaskDetailPanelComponent {
+export class TaskDetailPanelComponent implements OnInit, OnDestroy {
   logMinutes: number = 30;
   activeBudget: ActiveBudget | null = null;
+  private subs: Subscription = new Subscription();
 
   constructor(
     public taskSelectionService: TaskSelectionService,
     private tasksService: TasksService,
     private financeService: FinanceService,
-  ) {
+    private cdr: ChangeDetectorRef,
+  ) {}
+
+  ngOnInit() {
     this.loadActiveBudget();
+
+    // Recharger le budget dès qu'un budget est créé ou une dépense ajoutée
+    this.subs.add(
+      this.taskSelectionService.budgetCreated$.subscribe(() => {
+        this.loadActiveBudget();
+      }),
+    );
+    this.subs.add(
+      this.taskSelectionService.expenseCreated$.subscribe(() => {
+        this.loadActiveBudget();
+      }),
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 
   get task() {
@@ -295,6 +316,7 @@ export class TaskDetailPanelComponent {
       next: (res) => {
         if (res && res.activeBudget) {
           this.activeBudget = res.activeBudget;
+          this.cdr.detectChanges();
         }
       },
     });
@@ -302,6 +324,7 @@ export class TaskDetailPanelComponent {
 
   close() {
     this.taskSelectionService.closePanel();
+    this.cdr.detectChanges();
   }
 
   onStatusChange(event: Event) {
@@ -312,6 +335,8 @@ export class TaskDetailPanelComponent {
     this.tasksService.updateStatus(current.id, newStatus).subscribe({
       next: (updated) => {
         this.taskSelectionService.updateSelectedTask(updated);
+        this.taskSelectionService.notifyTaskUpdated(updated);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         alert(err.error?.message || 'Erreur lors du changement de statut');
@@ -327,6 +352,8 @@ export class TaskDetailPanelComponent {
         if (current) {
           this.tasksService.findOne(current.id).subscribe((fresh) => {
             this.taskSelectionService.updateSelectedTask(fresh);
+            this.taskSelectionService.notifyTaskUpdated(fresh);
+            this.cdr.detectChanges();
           });
         }
       },
@@ -339,7 +366,9 @@ export class TaskDetailPanelComponent {
       next: () => {
         this.tasksService.findOne(taskId).subscribe((fresh) => {
           this.taskSelectionService.updateSelectedTask(fresh);
+          this.taskSelectionService.notifyTaskUpdated(fresh);
           this.logMinutes = 30;
+          this.cdr.detectChanges();
         });
       },
       error: (err) => {
@@ -352,6 +381,7 @@ export class TaskDetailPanelComponent {
     if (confirm('Voulez-vous vraiment supprimer cette tâche ?')) {
       this.tasksService.remove(taskId).subscribe({
         next: () => {
+          this.taskSelectionService.notifyTaskDeleted(taskId);
           this.close();
         },
       });

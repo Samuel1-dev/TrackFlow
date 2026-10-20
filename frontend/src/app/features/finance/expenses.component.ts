@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { FinanceService } from '../../core/services/finance.service';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
 import { Expense, ExpenseCategory } from '../../core/models/finance.models';
@@ -116,25 +117,45 @@ import { Expense, ExpenseCategory } from '../../core/models/finance.models';
     </div>
   `,
 })
-export class ExpensesComponent implements OnInit {
+export class ExpensesComponent implements OnInit, OnDestroy {
   expenses: Expense[] = [];
   categories: ExpenseCategory[] = [];
   totalSpent = 0;
   selectedCategory = '';
+  private subs: Subscription = new Subscription();
 
   constructor(
     private financeService: FinanceService,
     public taskSelectionService: TaskSelectionService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
     this.loadCategories();
     this.loadExpenses();
+
+    // Ajout instantané sans rechargement de page
+    this.subs.add(
+      this.taskSelectionService.expenseCreated$.subscribe((newExp) => {
+        if (!this.selectedCategory || this.selectedCategory === newExp.categoryId) {
+          this.expenses.unshift(newExp);
+        }
+        this.totalSpent += Number(newExp.amount);
+        this.cdr.detectChanges();
+      }),
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 
   loadCategories() {
     this.financeService.getCategories().subscribe({
-      next: (cats) => (this.categories = cats),
+      next: (cats) => {
+        this.categories = cats;
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -145,6 +166,7 @@ export class ExpensesComponent implements OnInit {
         next: (res) => {
           this.expenses = res.expenses;
           this.totalSpent = res.totalSpent;
+          this.cdr.detectChanges();
         },
       });
   }
@@ -156,8 +178,16 @@ export class ExpensesComponent implements OnInit {
 
   deleteExpense(id: string) {
     if (confirm('Supprimer cette dépense ?')) {
+      const target = this.expenses.find((e) => e.id === id);
       this.financeService.deleteExpense(id).subscribe({
-        next: () => this.loadExpenses(),
+        next: () => {
+          this.expenses = this.expenses.filter((e) => e.id !== id);
+          if (target) {
+            this.totalSpent -= Number(target.amount);
+          }
+          this.taskSelectionService.notifyExpenseDeleted(id);
+          this.cdr.detectChanges();
+        },
       });
     }
   }
