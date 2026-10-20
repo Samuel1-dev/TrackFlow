@@ -81,4 +81,22 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         error: (err) => alert(err.error?.message || 'Erreur lors de la création'),
       });
   }
+
+  deleteProject(project: Project) {
+    const confirmed = confirm(
+      `Voulez-vous vraiment supprimer le projet "${project.title}" ?\nLes tâches associées ne seront pas supprimées mais détachées.`
+    );
+    if (!confirmed) return;
+
+    this.projectsService.remove(project.id).subscribe({
+      next: () => {
+        this.projects = this.projects.filter((p) => p.id !== project.id);
+        this.taskSelectionService.notifyProjectDeleted(project.id);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        alert(err.error?.message || 'Erreur lors de la suppression du projet');
+      },
+    });
+  }
 }

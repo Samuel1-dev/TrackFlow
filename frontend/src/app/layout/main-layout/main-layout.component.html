@@ -33,7 +33,11 @@
   </div>
 
   <!-- 3. RIGHT PANEL (Task Details / Financial Overview) (Desktop) -->
-  <div class="hidden xl:block h-full shrink-0">
+  <div
+    class="hidden xl:block h-full shrink-0 transition-all duration-300 overflow-hidden"
+    [class.w-96]="!taskSelectionService.isRightPanelCollapsed()"
+    [class.w-0]="taskSelectionService.isRightPanelCollapsed()"
+  >
     <app-task-detail-panel></app-task-detail-panel>
   </div>
 

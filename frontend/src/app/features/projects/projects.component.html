@@ -14,52 +14,77 @@
     </button>
   </div>
 
-  <!-- Projects Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @for (project of projects; track project.id) {
-      <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-6 border border-slate-100 dark:border-slate-800 shadow-card flex flex-col justify-between hover:border-brand-300 dark:hover:border-brand-700 transition-all">
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <span class="px-2.5 py-1 text-[10px] font-bold rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/60 dark:text-brand-400">
-              {{ project.status }}
-            </span>
-            <span class="text-xs font-bold text-slate-400">
-              {{ project.stats?.progressPercent || 0 }}%
-            </span>
+  <!-- Projects Grid / Empty State -->
+  @if (projects.length === 0) {
+    <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-12 text-center border border-slate-100 dark:border-slate-800 shadow-card">
+      <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 mx-auto flex items-center justify-center mb-3">
+        <app-icon name="projects" [size]="24"></app-icon>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">Aucun projet trouvé</h3>
+      <p class="text-xs text-slate-400 mt-1 mb-4">Créez votre premier projet pour regrouper et suivre vos tâches.</p>
+      <button
+        (click)="openModal = true"
+        class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20"
+      >
+        Créer un projet
+      </button>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (project of projects; track project.id) {
+        <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-6 border border-slate-100 dark:border-slate-800 shadow-card flex flex-col justify-between hover:border-brand-300 dark:hover:border-brand-700 transition-all group/card">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-2.5 py-1 text-[10px] font-bold rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/60 dark:text-brand-400 uppercase">
+                {{ project.status }}
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400">
+                  {{ project.stats?.progressPercent || 0 }}%
+                </span>
+                <button
+                  (click)="deleteProject(project)"
+                  class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                  title="Supprimer ce projet"
+                >
+                  <app-icon name="trash" [size]="14"></app-icon>
+                </button>
+              </div>
+            </div>
+
+            <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">
+              {{ project.title }}
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 leading-relaxed">
+              {{ project.description || 'Aucune description fournie.' }}
+            </p>
           </div>
 
-          <h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">
-            {{ project.title }}
-          </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-4 leading-relaxed">
-            {{ project.description || 'Aucune description fournie.' }}
-          </p>
-        </div>
+          <div class="space-y-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <!-- Progress bar -->
+            <div>
+              <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div
+                  class="bg-gradient-to-r from-brand-600 to-indigo-500 h-full rounded-full transition-all duration-300"
+                  [style.width.%]="project.stats?.progressPercent || 0"
+                ></div>
+              </div>
+            </div>
 
-        <div class="space-y-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-          <!-- Progress bar -->
-          <div>
-            <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div
-                class="bg-gradient-to-r from-brand-600 to-indigo-500 h-full rounded-full transition-all duration-300"
-                [style.width.%]="project.stats?.progressPercent || 0"
-              ></div>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+              <span>{{ project.stats?.total || 0 }} tâches</span>
+              <span class="text-emerald-600 dark:text-emerald-400">{{ project.stats?.done || 0 }} terminées</span>
+              @if (project.stats?.overdue; as overdue) {
+                @if (overdue > 0) {
+                  <span class="text-rose-600 dark:text-rose-400">{{ overdue }} en retard</span>
+                }
+              }
             </div>
           </div>
-
-          <div class="flex items-center justify-between text-[11px] text-slate-400 font-semibold">
-            <span>{{ project.stats?.total || 0 }} tâches</span>
-            <span class="text-emerald-600 dark:text-emerald-400">{{ project.stats?.done || 0 }} terminées</span>
-            @if (project.stats?.overdue; as overdue) {
-              @if (overdue > 0) {
-                <span class="text-rose-600 dark:text-rose-400">{{ overdue }} en retard</span>
-              }
-            }
-          </div>
         </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
+  }
 
   <!-- Create Project Modal -->
   @if (openModal) {

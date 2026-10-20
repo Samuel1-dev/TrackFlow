@@ -14,6 +14,10 @@ export class TaskSelectionService {
   // État d'ouverture du panneau droit (particulièrement utile sur mobile/tablette)
   public readonly isPanelOpen = signal<boolean>(false);
 
+  // Barres latérales pliables manuellement
+  public readonly isLeftSidebarCollapsed = signal<boolean>(false);
+  public readonly isRightPanelCollapsed = signal<boolean>(false);
+
   // Modales d'actions rapides
   public readonly isCreateModalOpen = signal<boolean>(false);
   public readonly isExpenseModalOpen = signal<boolean>(false);
@@ -30,12 +34,14 @@ export class TaskSelectionService {
 
   public readonly budgetCreated$ = new Subject<ActiveBudget | any>();
   public readonly projectCreated$ = new Subject<Project>();
+  public readonly projectDeleted$ = new Subject<string>();
 
   public readonly refreshRequested$ = new Subject<void>();
 
   selectTask(task: Task) {
     this.selectedTask.set(task);
     this.isPanelOpen.set(true);
+    this.isRightPanelCollapsed.set(false);
   }
 
   updateSelectedTask(task: Task) {
@@ -46,6 +52,18 @@ export class TaskSelectionService {
   closePanel() {
     this.selectedTask.set(null);
     this.isPanelOpen.set(false);
+  }
+
+  toggleLeftSidebar() {
+    this.isLeftSidebarCollapsed.update((v) => !v);
+  }
+
+  toggleRightPanel() {
+    this.isRightPanelCollapsed.update((v) => !v);
+  }
+
+  setRightPanelCollapsed(collapsed: boolean) {
+    this.isRightPanelCollapsed.set(collapsed);
   }
 
   openCreateTask() {
@@ -110,6 +128,10 @@ export class TaskSelectionService {
 
   notifyProjectCreated(project: Project) {
     this.projectCreated$.next(project);
+  }
+
+  notifyProjectDeleted(projectId: string) {
+    this.projectDeleted$.next(projectId);
   }
 
   triggerRefresh() {

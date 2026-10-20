@@ -17,6 +17,16 @@ export class SidebarComponent {
     public taskSelectionService: TaskSelectionService,
   ) {}
 
+  get isCollapsed(): boolean {
+    // Sur mobile, la sidebar est toujours déployée dans son tiroir
+    if (this.isMobileOpen) return false;
+    return this.taskSelectionService.isLeftSidebarCollapsed();
+  }
+
+  toggleCollapse() {
+    this.taskSelectionService.toggleLeftSidebar();
+  }
+
   onNavigate() {
     this.closeMobileSidebar.emit();
   }

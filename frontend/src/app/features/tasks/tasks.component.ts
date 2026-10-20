@@ -50,6 +50,12 @@ export class TasksComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }),
     );
+
+    this.subs.add(
+      this.taskSelectionService.projectDeleted$.subscribe(() => {
+        this.loadTasks();
+      }),
+    );
   }
 
   ngOnDestroy() {

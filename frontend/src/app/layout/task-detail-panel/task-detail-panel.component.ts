@@ -64,6 +64,11 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  collapsePanel() {
+    this.taskSelectionService.setRightPanelCollapsed(true);
+    this.cdr.detectChanges();
+  }
+
   onStatusChange(event: Event) {
     const newStatus = (event.target as HTMLSelectElement).value as TaskStatus;
     const current = this.task();

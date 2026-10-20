@@ -1,4 +1,5 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
 import { TasksService } from '../../core/services/tasks.service';
 import { ProjectsService } from '../../core/services/projects.service';
@@ -12,11 +13,12 @@ import { ExpenseCategory } from '../../core/models/finance.models';
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.scss',
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit, OnDestroy {
   isMobileSidebarOpen = false;
 
   projects: Project[] = [];
   categories: ExpenseCategory[] = [];
+  private subs: Subscription = new Subscription();
 
   newTask = {
     title: '',
@@ -47,8 +49,32 @@ export class MainLayoutComponent {
     private projectsService: ProjectsService,
     private financeService: FinanceService,
     private cdr: ChangeDetectorRef,
-  ) {
+  ) {}
+
+  ngOnInit() {
     this.loadDependencies();
+
+    // Écoute de la création et suppression de projet en temps réel
+    this.subs.add(
+      this.taskSelectionService.projectCreated$.subscribe((newProj) => {
+        this.projects.unshift(newProj);
+        this.cdr.detectChanges();
+      }),
+    );
+
+    this.subs.add(
+      this.taskSelectionService.projectDeleted$.subscribe((deletedId) => {
+        this.projects = this.projects.filter((p) => p.id !== deletedId);
+        if (this.newTask.projectId === deletedId) {
+          this.newTask.projectId = undefined;
+        }
+        this.cdr.detectChanges();
+      }),
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 
   loadDependencies() {

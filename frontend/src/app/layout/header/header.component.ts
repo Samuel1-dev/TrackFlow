@@ -1,6 +1,7 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService, ThemeMode } from '../../core/services/theme.service';
+import { TaskSelectionService } from '../../core/services/task-selection.service';
 
 @Component({
   selector: 'app-header',
@@ -17,10 +18,27 @@ export class HeaderComponent {
   constructor(
     public authService: AuthService,
     public themeService: ThemeService,
+    public taskSelectionService: TaskSelectionService,
   ) {}
 
   get user() {
     return this.authService.currentUser;
+  }
+
+  get isLeftSidebarCollapsed(): boolean {
+    return this.taskSelectionService.isLeftSidebarCollapsed();
+  }
+
+  get isRightPanelCollapsed(): boolean {
+    return this.taskSelectionService.isRightPanelCollapsed();
+  }
+
+  toggleLeftSidebar() {
+    this.taskSelectionService.toggleLeftSidebar();
+  }
+
+  toggleRightPanel() {
+    this.taskSelectionService.toggleRightPanel();
   }
 
   getInitials(): string {

@@ -12,12 +12,22 @@
           </span>
         }
       </div>
-      <button
-        (click)="close()"
-        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-      >
-        <app-icon name="x" [size]="18"></app-icon>
-      </button>
+      <div class="flex items-center gap-1">
+        <button
+          (click)="collapsePanel()"
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          title="Plier le panneau"
+        >
+          <app-icon name="panel-right" [size]="17"></app-icon>
+        </button>
+        <button
+          (click)="close()"
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          title="Fermer les détails"
+        >
+          <app-icon name="x" [size]="18"></app-icon>
+        </button>
+      </div>
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 space-y-6">
@@ -195,8 +205,17 @@
   <!-- Mode 2: No Task Selected -> Show Financial Overview (Finora Visa Card + Goals) -->
   @else {
     <div class="h-20 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-      <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Aperçu Financier</span>
-      <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">Mode Veille</span>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Aperçu Financier</span>
+        <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">Mode Veille</span>
+      </div>
+      <button
+        (click)="collapsePanel()"
+        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        title="Plier le panneau"
+      >
+        <app-icon name="panel-right" [size]="17"></app-icon>
+      </button>
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 space-y-6">

@@ -74,6 +74,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }),
     );
+
+    this.subs.add(
+      this.taskSelectionService.projectCreated$.subscribe(() => {
+        this.loadData();
+        this.cdr.detectChanges();
+      }),
+    );
+
+    this.subs.add(
+      this.taskSelectionService.projectDeleted$.subscribe(() => {
+        this.loadData();
+        this.cdr.detectChanges();
+      }),
+    );
   }
 
   ngOnDestroy() {
