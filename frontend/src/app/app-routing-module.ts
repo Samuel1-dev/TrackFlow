@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
-import { MainLayoutComponent } from './layout/main-layout.component';
+import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { TasksComponent } from './features/tasks/tasks.component';
 import { ProjectsComponent } from './features/projects/projects.component';
-import { BudgetsComponent } from './features/finance/budgets.component';
-import { ExpensesComponent } from './features/finance/expenses.component';
-import { LoginComponent } from './features/auth/login.component';
-import { RegisterComponent } from './features/auth/register.component';
+import { BudgetsComponent } from './features/finance/budgets/budgets.component';
+import { ExpensesComponent } from './features/finance/expenses/expenses.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
 
 const routes: Routes = [
   // Public Auth Routes

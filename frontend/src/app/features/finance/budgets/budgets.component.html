@@ -1,0 +1,138 @@
+<div class="space-y-6 pb-12">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-black text-slate-900 dark:text-white">Budgets & Objectifs</h1>
+      <p class="text-xs text-slate-400 mt-1">Gérez vos enveloppes budgétaires périodiques et votre épargne</p>
+    </div>
+    <button
+      (click)="taskSelectionService.openCreateBudget()"
+      class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition-all flex items-center gap-2 self-start sm:self-auto"
+    >
+      <app-icon name="plus" [size]="15"></app-icon>
+      <span>Nouveau budget</span>
+    </button>
+  </div>
+
+  <!-- Active Budget Big Card (Finora Style) -->
+  @if (activeBudget) {
+    <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-7 border border-slate-100 dark:border-slate-800 shadow-card space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <span class="px-2.5 py-1 text-[10px] font-bold rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 uppercase">
+            Budget Actif ({{ activeBudget.periodType }})
+          </span>
+          <p class="text-xs text-slate-400 mt-1">
+            Du {{ activeBudget.startDate | date:'dd MMM yyyy' }} au {{ activeBudget.endDate | date:'dd MMM yyyy' }}
+          </p>
+        </div>
+
+        <!-- Overspend Alerts -->
+        @if (activeBudget.isOverBudget) {
+          <span class="px-3 py-1 rounded-xl bg-rose-100 text-rose-700 text-xs font-bold flex items-center gap-1.5 self-start">
+            <app-icon name="alert" [size]="14"></app-icon> Dépassement de budget global !
+          </span>
+        } @else if (activeBudget.isOverExpenseBudget) {
+          <span class="px-3 py-1 rounded-xl bg-amber-100 text-amber-700 text-xs font-bold flex items-center gap-1.5 self-start">
+            <app-icon name="alert" [size]="14"></app-icon> Dépassement du budget prévu pour les dépenses
+          </span>
+        }
+      </div>
+
+      <!-- Financial Indicator Metrics Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40">
+          <span class="text-[11px] font-bold text-slate-400 uppercase">Budget Initial</span>
+          <p class="text-lg font-black text-slate-900 dark:text-white mt-1">
+            {{ activeBudget.initialAmount | fcfa }}
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40">
+          <span class="text-[11px] font-bold text-slate-400 uppercase">Prévu pour Dépenses</span>
+          <p class="text-lg font-black text-brand-600 dark:text-brand-400 mt-1">
+            {{ activeBudget.availableBudgetForExpenses | fcfa }}
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40">
+          <span class="text-[11px] font-bold text-slate-400 uppercase">Total Dépensé</span>
+          <p class="text-lg font-black text-rose-600 dark:text-rose-400 mt-1">
+            {{ activeBudget.totalSpent | fcfa }}
+          </p>
+        </div>
+
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40">
+          <span class="text-[11px] font-bold text-slate-400 uppercase">Budget Restant</span>
+          <p class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1">
+            {{ activeBudget.remainingBudget | fcfa }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Savings Target Progress Bar -->
+      <div class="space-y-2 pt-2">
+        <div class="flex items-center justify-between text-xs font-bold">
+          <span class="text-slate-700 dark:text-slate-300">
+            Objectif d'Épargne : {{ activeBudget.savingsTarget | fcfa }}
+          </span>
+          <span class="text-brand-600 dark:text-brand-400">
+            {{ activeBudget.savingsProgressPercent }}% atteint
+          </span>
+        </div>
+        <div class="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
+          <div
+            class="bg-gradient-to-r from-brand-600 via-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-500"
+            [style.width.%]="activeBudget.savingsProgressPercent"
+          ></div>
+        </div>
+        <div class="flex justify-between text-[11px] text-slate-400 font-semibold pt-1">
+          <span>Épargne estimée : {{ activeBudget.estimatedSavings | fcfa }}</span>
+          <span [class.text-emerald-600]="activeBudget.savingsTargetGap >= 0" [class.text-rose-600]="activeBudget.savingsTargetGap < 0">
+            Écart objectif : {{ activeBudget.savingsTargetGap >= 0 ? '+' : '' }}{{ activeBudget.savingsTargetGap | fcfa }}
+          </span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-12 text-center border border-slate-100 dark:border-slate-800 shadow-card">
+      <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 mx-auto flex items-center justify-center mb-3">
+        <app-icon name="budgets" [size]="24"></app-icon>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">Aucun budget actif</h3>
+      <p class="text-xs text-slate-400 mt-1 mb-4">Créez votre enveloppe budgétaire pour commencer à suivre vos dépenses.</p>
+      <button
+        (click)="taskSelectionService.openCreateBudget()"
+        class="px-4 py-2 rounded-xl bg-brand-600 text-white font-bold text-xs shadow-md shadow-brand-500/20"
+      >
+        Créer un budget
+      </button>
+    </div>
+  }
+
+  <!-- Past Budgets History -->
+  @if (history.length > 0) {
+    <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-6 border border-slate-100 dark:border-slate-800 shadow-card">
+      <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Historique des Budgets Passés</h3>
+      <div class="divide-y divide-slate-100 dark:divide-slate-800">
+        @for (item of history; track item.id) {
+          <div class="py-3.5 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-900 dark:text-white">
+                Budget {{ item.periodType }} &bull; {{ item.startDate | date:'dd MMM' }} - {{ item.endDate | date:'dd MMM yyyy' }}
+              </p>
+              <span class="text-[10px] text-slate-400">
+                Initial: {{ item.initialAmount | fcfa }} &bull; Dépensé: {{ item.totalSpent | fcfa }}
+              </span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold" [class.text-emerald-600]="item.remainingBudget >= 0" [class.text-rose-600]="item.remainingBudget < 0">
+                Solde: {{ item.remainingBudget | fcfa }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

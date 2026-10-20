@@ -17,16 +17,16 @@ import { FcfaPipe } from './shared/pipes/fcfa.pipe';
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { HeaderComponent } from './layout/header/header.component';
 import { TaskDetailPanelComponent } from './layout/task-detail-panel/task-detail-panel.component';
-import { MainLayoutComponent } from './layout/main-layout.component';
+import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
 
 // Features
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { TasksComponent } from './features/tasks/tasks.component';
 import { ProjectsComponent } from './features/projects/projects.component';
-import { BudgetsComponent } from './features/finance/budgets.component';
-import { ExpensesComponent } from './features/finance/expenses.component';
-import { LoginComponent } from './features/auth/login.component';
-import { RegisterComponent } from './features/auth/register.component';
+import { BudgetsComponent } from './features/finance/budgets/budgets.component';
+import { ExpensesComponent } from './features/finance/expenses/expenses.component';
+import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
 
 @NgModule({
   declarations: [
