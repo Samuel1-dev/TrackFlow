@@ -35,6 +35,8 @@ async function bootstrap() {
     }),
   );
 
+  app.use(cookieParser());
+
   // Global exception filter and response interceptor
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
@@ -42,7 +44,9 @@ async function bootstrap() {
   // Swagger OpenAPI documentation
   const config = new DocumentBuilder()
     .setTitle('TaskFlow API')
-    .setDescription('API REST de gestion des tâches, projets et suivi financier personnel')
+    .setDescription(
+      'API REST de gestion des tâches, projets et suivi financier personnel',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -63,7 +67,9 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
   logger.log(`TaskFlow API is running on: http://localhost:${port}/api/v1`);
-  logger.log(`Swagger documentation available on: http://localhost:${port}/api/docs`);
+  logger.log(
+    `Swagger documentation available on: http://localhost:${port}/api/docs`,
+  );
 }
 
 bootstrap();

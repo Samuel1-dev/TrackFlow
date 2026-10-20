@@ -38,6 +38,7 @@ model User {
   passwordHash String
   firstName    String
   lastName     String
+  refreshHash String? 
   timezone     String         @default("UTC")
   currency     String         @default("XOF")
   createdAt    DateTime       @default(now())

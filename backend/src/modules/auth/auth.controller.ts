@@ -9,16 +9,44 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import type { Response, Request } from 'express';
+import type { Response, Request, CookieOptions } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Public } from '../../common/decorators/public.decorator';
 
+const REFRESH_COOKIE = 'refreshToken';
+const REFRESH_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 jours
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  // Lu à chaque appel (et non au chargement du module), pour que NODE_ENV soit bien défini
+  private cookieOptions(): CookieOptions {
+    return {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api/v1/auth',
+    };
+  }
+
+  private setRefreshCookie(response: Response, token: string) {
+    response.cookie(REFRESH_COOKIE, token, {
+      ...this.cookieOptions(),
+      maxAge: REFRESH_MAX_AGE,
+    });
+  }
+
+  private getRefreshCookie(request: Request): string | undefined {
+    const cookies = request.cookies as Record<string, unknown> | undefined;
+    const token =
+      (cookies?.[REFRESH_COOKIE] as string | undefined) ||
+      (request.body as Record<string, unknown> | undefined)?.refreshToken;
+    return typeof token === 'string' && token ? token : undefined;
+  }
 
   @Public()
   @ApiOperation({ summary: 'Inscription d’un nouvel utilisateur' })
@@ -28,21 +56,11 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const result = await this.authService.register(dto);
+    const { user, accessToken, refreshToken } =
+      await this.authService.register(dto);
 
-    // Refresh token dans un cookie HttpOnly sécurisé
-    response.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/api/v1/auth',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
-    });
-
-    return {
-      user: result.user,
-      accessToken: result.accessToken,
-    };
+    this.setRefreshCookie(response, refreshToken);
+    return { user, accessToken, refreshToken };
   }
 
   @Public()
@@ -54,20 +72,11 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const result = await this.authService.login(dto);
+    const { user, accessToken, refreshToken } =
+      await this.authService.login(dto);
 
-    response.cookie('refreshToken', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/api/v1/auth',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    return {
-      user: result.user,
-      accessToken: result.accessToken,
-    };
+    this.setRefreshCookie(response, refreshToken);
+    return { user, accessToken, refreshToken };
   }
 
   @Public()
@@ -76,40 +85,35 @@ export class AuthController {
   @Post('refresh')
   async refresh(
     @Req() request: Request,
-    @Body('refreshToken') bodyToken?: string,
-    @Res({ passthrough: true }) response?: Response,
+    @Body() body: { refreshToken?: string },
+    @Res({ passthrough: true }) response: Response,
   ) {
-    const token = request.cookies?.refreshToken || bodyToken;
+    const token = this.getRefreshCookie(request);
     if (!token) {
       throw new UnauthorizedException('Aucun jeton de rafraîchissement fourni');
     }
 
-    const tokens = await this.authService.refreshToken(token);
-
-    if (response) {
-      response.cookie('refreshToken', tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/api/v1/auth',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+    try {
+      const tokens = await this.authService.refreshToken(token);
+      this.setRefreshCookie(response, tokens.refreshToken);
+      return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+    } catch (error) {
+      // Token invalide, expiré ou révoqué : on supprime le cookie devenu inutile
+      response.clearCookie(REFRESH_COOKIE, this.cookieOptions());
+      throw error;
     }
-
-    return {
-      accessToken: tokens.accessToken,
-    };
   }
 
+  @Public()
   @ApiOperation({ summary: 'Déconnexion utilisateur' })
   @HttpCode(HttpStatus.OK)
   @Post('logout')
-  async logout(@Res({ passthrough: true }) response: Response) {
-    response.clearCookie('refreshToken', {
-      httpOnly: true,
-      path: '/api/v1/auth',
-    });
-
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.logout(this.getRefreshCookie(request));
+    response.clearCookie(REFRESH_COOKIE, this.cookieOptions());
     return { message: 'Déconnexion réussie' };
   }
 }

@@ -32,6 +32,8 @@ describe('AuthService', () => {
       user: {
         findUnique: jest.fn(),
         create: jest.fn(),
+        update: jest.fn().mockResolvedValue(mockUser),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       expenseCategory: {
         create: jest.fn(),
@@ -50,11 +52,21 @@ describe('AuthService', () => {
 
     const mockJwt = {
       signAsync: jest.fn().mockResolvedValue('mock-token'),
+      verifyAsync: jest.fn().mockResolvedValue({ sub: mockUser.id, email: mockUser.email }),
       verify: jest.fn(),
     };
 
     const mockConfig = {
-      get: jest.fn().mockReturnValue('mock-secret'),
+      get: jest.fn().mockImplementation((key: string) => {
+        if (key === 'JWT_EXPIRES_IN') return '15m';
+        if (key === 'JWT_REFRESH_EXPIRES_IN') return '7d';
+        return 'mock-secret';
+      }),
+      getOrThrow: jest.fn().mockImplementation((key: string) => {
+        if (key === 'JWT_EXPIRES_IN') return '15m';
+        if (key === 'JWT_REFRESH_EXPIRES_IN') return '7d';
+        return 'mock-secret';
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({

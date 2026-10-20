@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { createHash } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 
 const DEFAULT_CATEGORIES = [
@@ -20,6 +21,11 @@ const DEFAULT_CATEGORIES = [
   { name: 'Autres', icon: 'more-horizontal', color: '#6B7280' },
 ];
 
+interface JwtPayload {
+  sub: string;
+  email: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -27,6 +33,17 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
+
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
+  private async storeRefreshHash(userId: string, refreshToken: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshHash: this.hashToken(refreshToken) },
+    });
+  }
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
@@ -77,6 +94,7 @@ export class AuthService {
     });
 
     const tokens = await this.generateTokens(user.id, user.email);
+    await this.storeRefreshHash(user.id, tokens.refreshToken);
 
     return {
       user,
@@ -93,12 +111,16 @@ export class AuthService {
       throw new UnauthorizedException('Identifiants invalides');
     }
 
-    const isValidPassword = await bcrypt.compare(dto.password, user.passwordHash);
+    const isValidPassword = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
     if (!isValidPassword) {
       throw new UnauthorizedException('Identifiants invalides');
     }
 
     const tokens = await this.generateTokens(user.id, user.email);
+    await this.storeRefreshHash(user.id, tokens.refreshToken);
 
     return {
       user: {
@@ -116,53 +138,72 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
+    let payload: JwtPayload;
     try {
-      const refreshSecret =
-        this.configService.get<string>('JWT_REFRESH_SECRET') ||
-        'taskflow_super_secret_refresh_jwt_key_2026_dev_mode';
-
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: refreshSecret,
+      payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, {
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
       });
-
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-      });
-
-      if (!user) {
-        throw new UnauthorizedException('Session expirée');
-      }
-
-      const tokens = await this.generateTokens(user.id, user.email);
-
-      return tokens;
     } catch {
-      throw new UnauthorizedException('Jeton de rafraîchissement invalide ou expiré');
+      throw new UnauthorizedException(
+        'Jeton de rafraîchissement invalide ou expiré',
+      );
     }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
+
+    // Le token doit correspondre à celui enregistré (sinon : révoqué ou déjà utilisé)
+    if (
+      !user?.refreshHash ||
+      user.refreshHash !== this.hashToken(refreshToken)
+    ) {
+      throw new UnauthorizedException('Session expirée');
+    }
+
+    // Rotation : nouveau couple, l'ancien refresh token devient inutilisable
+    const tokens = await this.generateTokens(user.id, user.email);
+    await this.storeRefreshHash(user.id, tokens.refreshToken);
+    return tokens;
   }
 
   private async generateTokens(userId: string, email: string) {
-    const accessSecret =
-      this.configService.get<string>('JWT_SECRET') ||
-      'taskflow_super_secret_jwt_key_2026_dev_mode';
-    const refreshSecret =
-      this.configService.get<string>('JWT_REFRESH_SECRET') ||
-      'taskflow_super_secret_refresh_jwt_key_2026_dev_mode';
+    const payload = { sub: userId, email };
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        { sub: userId, email },
-        { secret: accessSecret, expiresIn: '15m' },
-      ),
-      this.jwtService.signAsync(
-        { sub: userId, email },
-        { secret: refreshSecret, expiresIn: '7d' },
-      ),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.getOrThrow<string>('JWT_SECRET'),
+        expiresIn: this.configService.getOrThrow<string>(
+          'JWT_EXPIRES_IN',
+        ) as `${number}${'s' | 'm' | 'h' | 'd'}`,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.getOrThrow<string>(
+          'JWT_REFRESH_EXPIRES_IN',
+        ) as `${number}${'s' | 'm' | 'h' | 'd'}`,
+      }),
     ]);
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return { accessToken, refreshToken };
+  }
+
+  async logout(refreshToken?: string) {
+    if (!refreshToken) return;
+
+    const secret = this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
+
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(
+        refreshToken,
+        { secret },
+      );
+      await this.prisma.user.updateMany({
+        where: { id: payload.sub },
+        data: { refreshHash: null },
+      });
+    } catch {
+      // Ignore invalid or expired refresh tokens during logout.
+    }
   }
 }
