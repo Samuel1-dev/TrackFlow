@@ -96,7 +96,10 @@ export class AuthController {
     try {
       const tokens = await this.authService.refreshToken(token);
       this.setRefreshCookie(response, tokens.refreshToken);
-      return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      };
     } catch (error) {
       // Token invalide, expiré ou révoqué : on supprime le cookie devenu inutile
       response.clearCookie(REFRESH_COOKIE, this.cookieOptions());
