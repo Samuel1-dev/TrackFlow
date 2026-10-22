@@ -33,6 +33,8 @@ export class TaskSelectionService {
   public readonly expenseDeleted$ = new Subject<string>();
 
   public readonly budgetCreated$ = new Subject<ActiveBudget | any>();
+  public readonly budgetUpdated$ = new Subject<ActiveBudget | any>();
+  public readonly budgetDeleted$ = new Subject<string>();
   public readonly projectCreated$ = new Subject<Project>();
   public readonly projectDeleted$ = new Subject<string>();
 
@@ -124,6 +126,14 @@ export class TaskSelectionService {
 
   notifyBudgetCreated(budget: any) {
     this.budgetCreated$.next(budget);
+  }
+
+  notifyBudgetUpdated(budget: any) {
+    this.budgetUpdated$.next(budget);
+  }
+
+  notifyBudgetDeleted(budgetId: string) {
+    this.budgetDeleted$.next(budgetId);
   }
 
   notifyProjectCreated(project: Project) {

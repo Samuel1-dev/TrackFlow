@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Body,
   Param,
@@ -16,6 +17,7 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { BudgetsService } from './budgets.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
+import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 
@@ -61,6 +63,16 @@ export class BudgetsController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.budgetsService.findOne(userId, id);
+  }
+
+  @ApiOperation({ summary: 'Mettre à jour un budget existant' })
+  @Patch(':id')
+  update(
+    @CurrentUser('userId') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateBudgetDto,
+  ) {
+    return this.budgetsService.update(userId, id, dto);
   }
 
   @ApiOperation({ summary: 'Supprimer un budget' })

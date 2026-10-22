@@ -125,114 +125,165 @@
     </div>
   </div>
 
-  <!-- 3. MIDDLE ROW: Spending / Time Overview Chart + Donut Chart (matching Finora) -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Activity & Spending Overview (2 cols) -->
-    <div class="lg:col-span-2 rounded-3xl bg-white dark:bg-surface-cardDark p-6 border border-slate-100 dark:border-slate-800 shadow-card flex flex-col justify-between">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">Aperçu de l'Activité & Dépenses</h3>
-          <p class="text-xs text-slate-400">Progression hebdomadaire du temps passé et des dépenses</p>
+  <!-- 3. MIDDLE ROW: Dynamic Weekly Spending Curve (Full Width) -->
+  <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-6 sm:p-7 border border-slate-100 dark:border-slate-800 shadow-card space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold">
+            <app-icon name="expenses" [size]="18"></app-icon>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Évolution Réelle des Dépenses</h3>
+            <p class="text-xs text-slate-400">Progression dynamique des montants dépensés par semaine ce mois-ci</p>
+          </div>
         </div>
-        <span class="text-xs font-semibold px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-          Ce mois-ci
+      </div>
+
+      <div class="flex items-center gap-2.5 flex-wrap">
+        @if (peakWeek && peakWeek.amount > 0) {
+          <span class="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1.5">
+            <app-icon name="sparkles" [size]="13"></app-icon>
+            <span>Pic : {{ peakWeek.label }} ({{ peakWeek.amount | fcfa }})</span>
+          </span>
+        }
+        <span class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5">
+          <span>Total ce mois :</span>
+          <span class="text-brand-600 dark:text-brand-400 font-extrabold">{{ totalMonthExpenses | fcfa }}</span>
         </span>
-      </div>
-
-      <!-- Styled SVG Graphic Curve (matching Finora aesthetic) -->
-      <div class="h-48 w-full relative flex items-end">
-        <svg class="w-full h-full overflow-visible" viewBox="0 0 500 150" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.25"/>
-              <stop offset="100%" stop-color="#6366f1" stop-opacity="0.0"/>
-            </linearGradient>
-          </defs>
-          <!-- Fill under curve -->
-          <path d="M0,130 Q100,50 200,90 T350,40 T500,80 L500,150 L0,150 Z" fill="url(#curveGradient)" />
-          <!-- Smooth line -->
-          <path d="M0,130 Q100,50 200,90 T350,40 T500,80" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round"/>
-          <!-- Accent points -->
-          <circle cx="200" cy="90" r="5" fill="#6366f1" class="ring-4 ring-white dark:ring-surface-cardDark" />
-          <circle cx="350" cy="40" r="5" fill="#6366f1" class="ring-4 ring-white dark:ring-surface-cardDark" />
-        </svg>
-      </div>
-
-      <div class="flex justify-between items-center pt-4 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-semibold text-slate-400">
-        <span>Semaine 1</span>
-        <span>Semaine 2</span>
-        <span>Semaine 3</span>
-        <span>Semaine 4</span>
       </div>
     </div>
 
-    <!-- Donut Chart: Expense by Category (1 col) -->
-    <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-6 border border-slate-100 dark:border-slate-800 shadow-card flex flex-col justify-between">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-base font-bold text-slate-900 dark:text-white">Dépenses par Catégorie</h3>
-      </div>
+    <!-- Dynamic SVG Curve Graphic -->
+    <div class="w-full relative pt-4 pb-2">
+      <!-- Background Guide Lines -->
+      <div class="h-44 w-full relative">
+        <svg class="w-full h-full overflow-visible" viewBox="0 0 500 150" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="dynamicCurveGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.35"/>
+              <stop offset="50%" stop-color="#818cf8" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0.0"/>
+            </linearGradient>
+            <filter id="pointGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#6366f1" flood-opacity="0.5"/>
+            </filter>
+          </defs>
 
-      <!-- Interactive Donut Display -->
-      <div class="relative w-36 h-36 mx-auto my-2 flex items-center justify-center">
-        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-          <!-- Background Circle -->
-          <path
-            class="text-slate-100 dark:text-slate-800"
-            stroke="currentColor"
-            stroke-width="5"
-            fill="none"
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          />
-          <!-- Donut Segment 1 (Brand) -->
-          <path
-            class="text-brand-500"
-            stroke="currentColor"
-            stroke-width="5"
-            stroke-dasharray="45, 100"
-            fill="none"
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          />
-          <!-- Donut Segment 2 (Rose) -->
-          <path
-            class="text-rose-500"
-            stroke="currentColor"
-            stroke-width="5"
-            stroke-dasharray="30, 100"
-            stroke-dashoffset="-45"
-            fill="none"
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          />
-          <!-- Donut Segment 3 (Emerald) -->
-          <path
-            class="text-emerald-500"
-            stroke="currentColor"
-            stroke-width="5"
-            stroke-dasharray="25, 100"
-            stroke-dashoffset="-75"
-            fill="none"
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          />
+          <!-- Horizontal reference grid lines -->
+          <line x1="30" y1="25" x2="470" y2="25" stroke="#94a3b8" stroke-opacity="0.15" stroke-dasharray="4,4" />
+          <line x1="30" y1="75" x2="470" y2="75" stroke="#94a3b8" stroke-opacity="0.15" stroke-dasharray="4,4" />
+          <line x1="30" y1="125" x2="470" y2="125" stroke="#94a3b8" stroke-opacity="0.25" />
+
+          <!-- Dynamic Filled Area under Curve -->
+          @if (curveAreaPath) {
+            <path
+              [attr.d]="curveAreaPath"
+              fill="url(#dynamicCurveGradient)"
+              class="transition-all duration-700 ease-out"
+            />
+          }
+
+          <!-- Dynamic Spline Stroke -->
+          @if (curvePath) {
+            <path
+              [attr.d]="curvePath"
+              fill="none"
+              stroke="#6366f1"
+              stroke-width="3.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="transition-all duration-700 ease-out"
+            />
+          }
+
+          <!-- Dynamic Points with Exact Coordinates and Values -->
+          @for (point of weeklyExpensePoints; track point.weekIndex) {
+            <!-- Vertical guide to axis -->
+            <line
+              [attr.x1]="point.x"
+              [attr.y1]="point.y"
+              [attr.x2]="point.x"
+              y2="125"
+              stroke="#6366f1"
+              stroke-opacity="0.2"
+              stroke-dasharray="2,2"
+            />
+
+            <!-- Point Halo on hover or peak -->
+            @if (point.amount > 0) {
+              <circle
+                [attr.cx]="point.x"
+                [attr.cy]="point.y"
+                r="10"
+                fill="#6366f1"
+                fill-opacity="0.18"
+                class="animate-pulse"
+              />
+            }
+
+            <!-- Point Dot -->
+            <circle
+              [attr.cx]="point.x"
+              [attr.cy]="point.y"
+              [attr.r]="point.amount > 0 ? 5.5 : 4"
+              [attr.fill]="point.amount > 0 ? '#4f46e5' : '#94a3b8'"
+              stroke="#ffffff"
+              stroke-width="2.5"
+              class="cursor-pointer transition-all duration-300 hover:scale-125"
+              filter="url(#pointGlow)"
+              (click)="selectChartPoint(point)"
+            />
+
+            <!-- Value label positioned dynamically above the point -->
+            @if (point.amount > 0) {
+              <g [attr.transform]="'translate(' + point.x + ',' + (point.y - 12) + ')'">
+                <text
+                  text-anchor="middle"
+                  class="text-[10px] font-extrabold fill-brand-600 dark:fill-brand-400 select-none"
+                >
+                  {{ point.amount | fcfa }}
+                </text>
+              </g>
+            }
+          }
         </svg>
-        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span class="text-[10px] text-slate-400 uppercase font-semibold">Total</span>
-          <span class="text-xs font-black text-slate-900 dark:text-white">
-            {{ (summary?.finance?.activeBudget?.totalSpent || 0) | fcfa }}
-          </span>
-        </div>
       </div>
+    </div>
 
-      <!-- Breakdown List -->
-      <div class="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-        @for (item of (summary?.finance?.expensesBreakdown || []).slice(0, 3); track item.categoryId) {
-          <div class="flex items-center justify-between text-xs">
-            <span class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-              <span class="w-2.5 h-2.5 rounded-full bg-brand-500"></span>
-              <span class="truncate max-w-[110px]">{{ item.categoryName }}</span>
-            </span>
-            <span class="font-bold text-slate-900 dark:text-white">{{ item.percentage }}%</span>
+    <!-- Bottom Weekly Breakdown Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+      @for (point of weeklyExpensePoints; track point.weekIndex) {
+        <div
+          (click)="selectChartPoint(point)"
+          class="p-3.5 rounded-2xl border transition-all cursor-pointer"
+          [class.border-brand-500]="selectedPoint?.weekIndex === point.weekIndex"
+          [class.bg-brand-50/40]="selectedPoint?.weekIndex === point.weekIndex"
+          [class.dark:bg-brand-950/20]="selectedPoint?.weekIndex === point.weekIndex"
+          [class.border-slate-100]="selectedPoint?.weekIndex !== point.weekIndex"
+          [class.dark:border-slate-800]="selectedPoint?.weekIndex !== point.weekIndex"
+          [class.hover:border-slate-200]="selectedPoint?.weekIndex !== point.weekIndex"
+          [class.dark:hover:border-slate-700]="selectedPoint?.weekIndex !== point.weekIndex"
+        >
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ point.label }}</span>
+            @if (peakWeek?.weekIndex === point.weekIndex && point.amount > 0) {
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                Pic
+              </span>
+            }
           </div>
-        }
-      </div>
+          <span class="text-[11px] text-slate-400 block mb-1.5">{{ point.rangeLabel }}</span>
+          <p
+            class="text-sm font-black truncate"
+            [class.text-rose-600]="point.amount > 0"
+            [class.dark:text-rose-400]="point.amount > 0"
+            [class.text-slate-400]="point.amount === 0"
+          >
+            {{ point.amount | fcfa }}
+          </p>
+        </div>
+      }
     </div>
   </div>
 

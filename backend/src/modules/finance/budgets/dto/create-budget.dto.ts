@@ -48,4 +48,8 @@ export class CreateBudgetDto {
   @IsString()
   @MaxLength(5)
   currency?: string;
+
+  @ApiPropertyOptional({ example: true, description: 'Remplacer le budget existant en cas de chevauchement' })
+  @IsOptional()
+  replaceExisting?: boolean;
 }

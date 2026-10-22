@@ -28,8 +28,31 @@ export class FinanceService {
     initialAmount: number;
     savingsTarget: number;
     currency?: string;
+    replaceExisting?: boolean;
   }): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/budgets`, dto).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  updateBudget(
+    id: string,
+    dto: {
+      periodType?: 'WEEKLY' | 'MONTHLY';
+      startDate?: string;
+      endDate?: string;
+      initialAmount?: number;
+      savingsTarget?: number;
+      currency?: string;
+    },
+  ): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/budgets/${id}`, dto).pipe(
+      map((res) => res.data),
+    );
+  }
+
+  deleteBudget(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/budgets/${id}`).pipe(
       map((res) => res.data),
     );
   }

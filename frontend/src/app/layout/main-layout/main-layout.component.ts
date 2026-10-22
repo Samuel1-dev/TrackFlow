@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, effect } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
 import { TasksService } from '../../core/services/tasks.service';
@@ -36,12 +36,16 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   };
 
   newBudget = {
-    periodType: 'MONTHLY' as const,
+    periodType: 'MONTHLY' as 'MONTHLY' | 'WEEKLY',
     startDate: '',
     endDate: '',
     initialAmount: 100000,
     savingsTarget: 20000,
   };
+
+  budgetErrorMessage: string = '';
+  budgetConflictDetected: boolean = false;
+  isSubmittingBudget: boolean = false;
 
   constructor(
     public taskSelectionService: TaskSelectionService,
@@ -49,7 +53,34 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     private financeService: FinanceService,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) {
+    this.initDefaultBudgetDates();
+
+    effect(() => {
+      if (this.taskSelectionService.isBudgetModalOpen()) {
+        this.initDefaultBudgetDates();
+      }
+    });
+  }
+
+  initDefaultBudgetDates() {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const formatYMD = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
+    this.newBudget.startDate = formatYMD(firstDay);
+    this.newBudget.endDate = formatYMD(lastDay);
+    this.budgetErrorMessage = '';
+    this.budgetConflictDetected = false;
+    this.isSubmittingBudget = false;
+  }
 
   ngOnInit() {
     this.loadDependencies();
@@ -135,23 +166,51 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       });
   }
 
-  submitCreateBudget() {
-    if (!this.newBudget.startDate || !this.newBudget.endDate) return;
+  submitCreateBudget(replaceExisting = false) {
+    this.budgetErrorMessage = '';
+    if (!this.newBudget.startDate || !this.newBudget.endDate) {
+      this.budgetErrorMessage = 'Veuillez sélectionner les dates de début et de fin.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (this.newBudget.savingsTarget > this.newBudget.initialAmount) {
+      this.budgetErrorMessage = 'L\'objectif d\'épargne ne peut pas dépasser le montant initial.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.isSubmittingBudget = true;
+    this.cdr.detectChanges();
+
     this.financeService
       .createBudget({
         periodType: this.newBudget.periodType,
-        startDate: new Date(this.newBudget.startDate).toISOString(),
-        endDate: new Date(this.newBudget.endDate).toISOString(),
+        startDate: new Date(this.newBudget.startDate + 'T00:00:00.000Z').toISOString(),
+        endDate: new Date(this.newBudget.endDate + 'T23:59:59.999Z').toISOString(),
         initialAmount: this.newBudget.initialAmount,
         savingsTarget: this.newBudget.savingsTarget,
+        replaceExisting,
       })
       .subscribe({
         next: (created) => {
+          this.isSubmittingBudget = false;
+          this.budgetConflictDetected = false;
+          this.budgetErrorMessage = '';
           this.taskSelectionService.closeCreateBudget();
           this.taskSelectionService.notifyBudgetCreated(created);
           this.cdr.detectChanges();
         },
-        error: (err) => alert(err.error?.message || 'Erreur lors du budget'),
+        error: (err) => {
+          this.isSubmittingBudget = false;
+          if (err.status === 409) {
+            this.budgetConflictDetected = true;
+            this.budgetErrorMessage = err.error?.message || 'Un budget existe déjà pour cette période.';
+          } else {
+            this.budgetErrorMessage = err.error?.message || 'Erreur lors de la création du budget.';
+          }
+          this.cdr.detectChanges();
+        },
       });
   }
 }

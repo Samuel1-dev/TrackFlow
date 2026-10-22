@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
+import { UpdateBudgetDto } from './dto/update-budget.dto';
 import { BudgetPeriodType } from '@prisma/client';
 import { FinanceCalculator } from '../finance-calculator';
 
@@ -81,7 +82,26 @@ export class BudgetsService {
       );
     }
 
-    await this.checkNoPeriodOverlap(userId, dto.periodType, startDate, endDate);
+    // Gestion du remplacement automatique ou de la vérification de chevauchement
+    const overlapping = await this.prisma.budget.findFirst({
+      where: {
+        userId,
+        periodType: dto.periodType,
+        OR: [
+          { startDate: { lte: endDate }, endDate: { gte: startDate } },
+        ],
+      },
+    });
+
+    if (overlapping) {
+      if (dto.replaceExisting) {
+        await this.prisma.budget.delete({ where: { id: overlapping.id } });
+      } else {
+        throw new ConflictException(
+          `Un budget ${dto.periodType} existe déjà pour cette période (${overlapping.startDate.toISOString().split('T')[0]} → ${overlapping.endDate.toISOString().split('T')[0]}).`,
+        );
+      }
+    }
 
     const budget = await this.prisma.budget.create({
       data: {
@@ -104,6 +124,51 @@ export class BudgetsService {
     });
 
     return { ...budget, ...indicators };
+  }
+
+  async update(userId: string, id: string, dto: UpdateBudgetDto) {
+    const existing = await this.ensureOwnership(userId, id);
+
+    const startDate = dto.startDate ? new Date(dto.startDate) : existing.startDate;
+    const endDate = dto.endDate ? new Date(dto.endDate) : existing.endDate;
+
+    if (endDate <= startDate) {
+      throw new BadRequestException('La date de fin doit être postérieure à la date de début');
+    }
+
+    const initialAmount = dto.initialAmount !== undefined ? dto.initialAmount : FinanceCalculator.toNumber(existing.initialAmount);
+    const savingsTarget = dto.savingsTarget !== undefined ? dto.savingsTarget : FinanceCalculator.toNumber(existing.savingsTarget);
+
+    if (savingsTarget > initialAmount) {
+      throw new BadRequestException(
+        'L\'objectif d\'épargne ne peut pas dépasser le montant initial du budget',
+      );
+    }
+
+    const periodType = dto.periodType ?? existing.periodType;
+    await this.checkNoPeriodOverlap(userId, periodType, startDate, endDate, id);
+
+    const updated = await this.prisma.budget.update({
+      where: { id },
+      data: {
+        periodType,
+        startDate,
+        endDate,
+        initialAmount,
+        savingsTarget,
+        currency: dto.currency ?? existing.currency,
+      },
+    });
+
+    const totalSpent = await this.computeTotalSpent(userId, startDate, endDate);
+    const indicators = FinanceCalculator.buildBudgetIndicators({
+      initialAmount: updated.initialAmount,
+      savingsTarget: updated.savingsTarget,
+      totalSpent,
+      currency: updated.currency,
+    });
+
+    return { ...updated, ...indicators };
   }
 
   async getActiveBudget(userId: string) {
