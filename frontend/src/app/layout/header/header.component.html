@@ -32,7 +32,10 @@
         class="w-full pl-10 pr-12 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"
       />
       <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-        <kbd class="px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded">⌘K</kbd>
+        <kbd class="px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded inline-flex items-center gap-0.5">
+          <app-icon name="command" [size]="10"></app-icon>
+          <span>K</span>
+        </kbd>
       </div>
     </div>
   </div>

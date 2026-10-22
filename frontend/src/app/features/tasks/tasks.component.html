@@ -130,21 +130,22 @@
                   }
                 </div>
 
-                <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                <div class="flex items-center gap-2 text-xs text-slate-400 mt-1 flex-wrap">
                   @if (task.project) {
                     <span class="font-semibold text-brand-600 dark:text-brand-400 flex items-center gap-1">
                       <app-icon name="projects" [size]="12"></app-icon>
                       {{ task.project.title }}
                     </span>
-                    <span>&bull;</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                   }
                   @if (task.dueDate) {
                     <span>Échéance: {{ task.dueDate | date:'dd MMM yyyy' }}</span>
-                    <span>&bull;</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
                   }
                   <span>Estimé: {{ task.estimatedMinutes }} min</span>
                   @if (task.totalLoggedMinutes) {
-                    <span>&bull; Logué: {{ task.totalLoggedMinutes }} min</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                    <span>Logué: {{ task.totalLoggedMinutes }} min</span>
                   }
                 </div>
               </div>

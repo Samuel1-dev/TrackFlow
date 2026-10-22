@@ -118,11 +118,15 @@
         @for (item of history; track item.id) {
           <div class="py-3.5 flex items-center justify-between">
             <div>
-              <p class="text-xs font-bold text-slate-900 dark:text-white">
-                Budget {{ item.periodType }} &bull; {{ item.startDate | date:'dd MMM' }} - {{ item.endDate | date:'dd MMM yyyy' }}
+              <p class="text-xs font-bold text-slate-900 dark:text-white flex items-center">
+                <span>Budget {{ item.periodType }}</span>
+                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 inline-block mx-1.5"></span>
+                <span>{{ item.startDate | date:'dd MMM' }} - {{ item.endDate | date:'dd MMM yyyy' }}</span>
               </p>
-              <span class="text-[10px] text-slate-400">
-                Initial: {{ item.initialAmount | fcfa }} &bull; Dépensé: {{ item.totalSpent | fcfa }}
+              <span class="text-[10px] text-slate-400 flex items-center mt-0.5">
+                <span>Initial: {{ item.initialAmount | fcfa }}</span>
+                <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 inline-block mx-1.5"></span>
+                <span>Dépensé: {{ item.totalSpent | fcfa }}</span>
               </span>
             </div>
             <div class="text-right">

@@ -6,9 +6,11 @@
         <span class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400">
           {{ greeting() }}
         </span>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 flex items-center gap-2">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1 flex items-center gap-2.5">
           {{ authService.currentUser()?.firstName || 'Ayesha' }} {{ authService.currentUser()?.lastName || 'Rahman' }}
-          <span class="text-2xl">👋</span>
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 shadow-sm">
+            <app-icon name="hand-wave" [size]="18"></app-icon>
+          </span>
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
           Voici votre aperçu de productivité et de finances pour aujourd'hui.
@@ -29,7 +31,7 @@
           class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors flex items-center gap-2"
         >
           <app-icon name="expenses" [size]="15"></app-icon>
-          <span>+ Dépense</span>
+          <span>Nouvelle dépense</span>
         </button>
       </div>
     </div>
@@ -240,8 +242,9 @@
     <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-6 border border-slate-100 dark:border-slate-800 shadow-card">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-bold text-slate-900 dark:text-white">Tâches Récentes</h3>
-        <a routerLink="/tasks" class="text-xs font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400">
-          Voir tout &rarr;
+        <a routerLink="/tasks" class="text-xs font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 flex items-center gap-1 group">
+          <span>Voir tout</span>
+          <app-icon name="arrow-right" [size]="13" className="group-hover:translate-x-0.5 transition-transform"></app-icon>
         </a>
       </div>
 
@@ -265,8 +268,10 @@
                   <p class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors" [class.line-through]="task.status === 'DONE'">
                     {{ task.title }}
                   </p>
-                  <span class="text-[10px] text-slate-400">
-                    {{ task.project?.title || 'Sans projet' }} &bull; {{ task.estimatedMinutes }} min
+                  <span class="text-[10px] text-slate-400 flex items-center gap-1.5">
+                    <span>{{ task.project?.title || 'Sans projet' }}</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                    <span>{{ task.estimatedMinutes }} min</span>
                   </span>
                 </div>
               </div>
@@ -299,8 +304,9 @@
     <div class="rounded-3xl bg-white dark:bg-surface-cardDark p-6 border border-slate-100 dark:border-slate-800 shadow-card">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-base font-bold text-slate-900 dark:text-white">Dernières Dépenses</h3>
-        <a routerLink="/finance/expenses" class="text-xs font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400">
-          Voir tout &rarr;
+        <a routerLink="/finance/expenses" class="text-xs font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 flex items-center gap-1 group">
+          <span>Voir tout</span>
+          <app-icon name="arrow-right" [size]="13" className="group-hover:translate-x-0.5 transition-transform"></app-icon>
         </a>
       </div>
 
@@ -318,8 +324,10 @@
                   <p class="text-xs font-bold text-slate-900 dark:text-white">
                     {{ expense.description || expense.category.name }}
                   </p>
-                  <span class="text-[10px] text-slate-400">
-                    {{ expense.category.name }} &bull; {{ expense.date | date:'dd MMM yyyy' }}
+                  <span class="text-[10px] text-slate-400 flex items-center gap-1.5">
+                    <span>{{ expense.category.name }}</span>
+                    <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                    <span>{{ expense.date | date:'dd MMM yyyy' }}</span>
                   </span>
                 </div>
               </div>
