@@ -344,6 +344,15 @@
                 >
                   {{ task.status }}
                 </span>
+
+                <button
+                  type="button"
+                  (click)="$event.stopPropagation(); deleteTask(task, $event)"
+                  class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors ml-0.5"
+                  title="Supprimer la tâche"
+                >
+                  <app-icon name="trash" [size]="14"></app-icon>
+                </button>
               </div>
             </div>
           }

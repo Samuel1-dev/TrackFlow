@@ -42,10 +42,11 @@ describe('TasksService', () => {
       task: {
         findUnique: jest.fn().mockResolvedValue(baseTask),
         findFirst: jest.fn().mockResolvedValue(baseTask),
-        findMany: jest.fn().mockResolvedValue([baseTask]),
+        findMany: jest.fn().mockResolvedValue([]),
         create: jest.fn().mockResolvedValue(baseTask),
         update: jest.fn().mockResolvedValue(baseTask),
         delete: jest.fn().mockResolvedValue(baseTask),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
         count: jest.fn().mockResolvedValue(0),
       },
       project: {
@@ -59,6 +60,7 @@ describe('TasksService', () => {
       },
       timeLog: {
         findMany: jest.fn().mockResolvedValue([]),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
         aggregate: jest.fn().mockResolvedValue({ _sum: { durationMinutes: 0 } }),
       },
     };

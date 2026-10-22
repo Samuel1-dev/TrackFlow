@@ -125,6 +125,30 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
         next: () => {
           this.taskSelectionService.notifyTaskDeleted(taskId);
           this.close();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
+        },
+      });
+    }
+  }
+
+  deleteSubtask(subId: string) {
+    if (confirm('Voulez-vous vraiment supprimer cette sous-tâche ?')) {
+      this.tasksService.remove(subId).subscribe({
+        next: () => {
+          const current = this.task();
+          if (current) {
+            this.tasksService.findOne(current.id).subscribe((fresh) => {
+              this.taskSelectionService.updateSelectedTask(fresh);
+              this.taskSelectionService.notifyTaskUpdated(fresh);
+              this.cdr.detectChanges();
+            });
+          }
+        },
+        error: (err) => {
+          alert(err.error?.message || 'Erreur lors de la suppression de la sous-tâche');
         },
       });
     }

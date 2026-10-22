@@ -60,7 +60,7 @@ export class TasksService {
 
   remove(id: string): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/${id}`).pipe(
-      map((res) => res.data),
+      map((res) => res?.data ?? res),
     );
   }
 

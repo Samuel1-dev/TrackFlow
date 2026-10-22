@@ -361,12 +361,48 @@ export class TasksService {
       include: { task: { select: { id: true, title: true } } },
     });
 
-    if (dependents.length > 0) {
-      // On supprime les dépendances automatiquement (CASCADE géré par Prisma/DB)
-      // Les tâches dépendantes restent mais leur dépendance est supprimée
+    // 1. Supprimer explicitement toutes les dépendances où cette tâche intervient
+    await this.prisma.taskDependency.deleteMany({
+      where: {
+        OR: [
+          { taskId: id },
+          { dependsOnTaskId: id },
+        ],
+      },
+    });
+
+    // 2. Supprimer les journaux de temps associés
+    await this.prisma.timeLog.deleteMany({
+      where: { taskId: id },
+    });
+
+    // 3. Supprimer ou nettoyer les sous-tâches éventuelles
+    const subTasks = await this.prisma.task.findMany({
+      where: { parentTaskId: id },
+      select: { id: true },
+    });
+
+    if (subTasks.length > 0) {
+      const subTaskIds = subTasks.map((s) => s.id);
+      await this.prisma.taskDependency.deleteMany({
+        where: {
+          OR: [
+            { taskId: { in: subTaskIds } },
+            { dependsOnTaskId: { in: subTaskIds } },
+          ],
+        },
+      });
+      await this.prisma.timeLog.deleteMany({
+        where: { taskId: { in: subTaskIds } },
+      });
+      await this.prisma.task.deleteMany({
+        where: { id: { in: subTaskIds } },
+      });
     }
 
+    // 4. Supprimer la tâche elle-même
     await this.prisma.task.delete({ where: { id } });
+
     return {
       message: 'Tâche supprimée avec succès',
       dependenciesReleased: dependents.length,

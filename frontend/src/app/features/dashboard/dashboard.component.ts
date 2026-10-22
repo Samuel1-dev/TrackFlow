@@ -283,4 +283,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       error: (err) => alert(err.error?.message || 'Erreur lors de la mise à jour'),
     });
   }
+
+  deleteTask(task: Task, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (confirm(`Voulez-vous vraiment supprimer la tâche "${task.title}" ?`)) {
+      this.tasksService.remove(task.id).subscribe({
+        next: () => {
+          this.allTasks = this.allTasks.filter((t) => t.id !== task.id);
+          this.taskSelectionService.notifyTaskDeleted(task.id);
+          this.loadData();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
+        },
+      });
+    }
+  }
 }

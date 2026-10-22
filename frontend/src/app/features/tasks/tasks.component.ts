@@ -97,4 +97,22 @@ export class TasksComponent implements OnInit, OnDestroy {
       error: (err) => alert(err.error?.message || 'Erreur lors du changement de statut'),
     });
   }
+
+  deleteTask(task: Task, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (confirm(`Voulez-vous vraiment supprimer la tâche "${task.title}" ?`)) {
+      this.tasksService.remove(task.id).subscribe({
+        next: () => {
+          this.tasks = this.tasks.filter((t) => t.id !== task.id);
+          this.taskSelectionService.notifyTaskDeleted(task.id);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
+        },
+      });
+    }
+  }
 }
