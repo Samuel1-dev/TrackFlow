@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -21,6 +21,7 @@ export class RegisterComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
+   private cdr: ChangeDetectorRef,
   ) {}
 
   onSubmit() {
@@ -41,10 +42,12 @@ export class RegisterComponent {
         next: () => {
           this.loading = false;
           this.router.navigate(['/dashboard']);
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.loading = false;
           this.errorMessage = err.error?.message || "Erreur lors de l'inscription";
+          this.cdr.detectChanges();
         },
       });
   }

@@ -3,7 +3,7 @@
 >
   <!-- Mode 1: A Task is Selected -> Show Detailed Task Workspace -->
   @if (task(); as currentTask) {
-    <div class="h-20 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+    <div class="py-3.5 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
       <div class="flex items-center gap-2">
         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Détails de la tâche</span>
         @if (currentTask.isBlockedByDeps) {
@@ -204,7 +204,7 @@
 
   <!-- Mode 2: No Task Selected -> Show Financial Overview (Finora Visa Card + Goals) -->
   @else {
-    <div class="h-20 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+    <div class="py-3.5 px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
       <div class="flex items-center gap-2">
         <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Aperçu Financier</span>
         <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">Mode Veille</span>

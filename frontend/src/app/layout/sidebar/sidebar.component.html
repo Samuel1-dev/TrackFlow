@@ -3,41 +3,31 @@
   [class.w-64]="!isCollapsed"
   [class.w-20]="isCollapsed"
 >
-  <!-- Logo Branding -->
-  <div class="h-20 flex items-center border-b border-slate-50 dark:border-slate-800/60"
-    [class.justify-between]="!isCollapsed"
-    [class.px-6]="!isCollapsed"
-    [class.justify-center]="isCollapsed"
-    [class.px-2]="isCollapsed"
-  >
-    <a routerLink="/dashboard" class="flex items-center gap-3 group" [attr.title]="isCollapsed ? 'TaskFlow' : null">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform shrink-0">
-        <app-icon name="dashboard" [size]="20" [strokeWidth]="2.2"></app-icon>
-      </div>
-      @if (!isCollapsed) {
-        <div class="overflow-hidden">
-          <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent truncate block">
-            TaskFlow
-          </span>
-          <span class="block text-[10px] font-semibold text-brand-600 dark:text-brand-400 tracking-wider uppercase truncate">Productivité & Finance</span>
+  <!-- Mobile Drawer Header (only when opened in mobile slide-over) -->
+  @if (isMobileOpen) {
+    <div class="h-16 flex items-center justify-between px-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+      <a routerLink="/dashboard" (click)="closeMobileSidebar.emit()" class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-sm">
+          <app-icon name="dashboard" [size]="16" [strokeWidth]="2.2"></app-icon>
         </div>
-      }
-    </a>
+        <div>
+          <span class="text-base font-extrabold text-slate-900 dark:text-white block leading-tight">TaskFlow</span>
+          <span class="text-[9px] font-bold text-brand-600 dark:text-brand-400 tracking-wider uppercase">Productivité & Finance</span>
+        </div>
+      </a>
 
-    <!-- Mobile Close Button -->
-    @if (isMobileOpen) {
       <button
         (click)="closeMobileSidebar.emit()"
-        class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
+        class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
         title="Fermer le menu"
       >
         <app-icon name="x" [size]="20"></app-icon>
       </button>
-    }
-  </div>
+    </div>
+  }
 
   <!-- Main Navigation Modules -->
-  <div class="flex-1 overflow-y-auto py-6 space-y-7" [class.px-4]="!isCollapsed" [class.px-2]="isCollapsed">
+  <div class="flex-1 overflow-y-auto py-5 space-y-6" [class.px-4]="!isCollapsed" [class.px-2]="isCollapsed">
     <div>
       @if (!isCollapsed) {
         <p class="px-3 mb-2 text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">

@@ -1,10 +1,32 @@
-<div class="flex h-screen w-screen overflow-hidden bg-[#f4f7fb] dark:bg-surface-dark text-slate-800 dark:text-slate-100 transition-colors duration-200">
-  <!-- 1. LEFT SIDEBAR (Desktop) -->
-  <div class="hidden lg:block h-full shrink-0">
-    <app-sidebar></app-sidebar>
+<div class="flex flex-col h-screen w-screen overflow-hidden bg-[#f4f7fb] dark:bg-surface-dark text-slate-800 dark:text-slate-100 transition-colors duration-200">
+  <!-- 1. FULL WIDTH HEADER AT THE VERY TOP -->
+  <app-header
+    (toggleMobileSidebar)="isMobileSidebarOpen = !isMobileSidebarOpen"
+    class="w-full shrink-0 z-30"
+  ></app-header>
+
+  <!-- 2. UNDER THE HEADER: Sidebars and Main Content -->
+  <div class="flex-1 flex min-h-0 w-full overflow-hidden relative">
+    <!-- LEFT SIDEBAR (Desktop) -->
+    <div class="hidden lg:block h-full shrink-0">
+      <app-sidebar></app-sidebar>
+    </div>
+
+    <!-- CENTER CONTENT (Dynamic Router Outlet) -->
+    <main class="flex-1 overflow-y-auto min-w-0 h-full px-4 sm:px-6 lg:px-8 py-6">
+      <router-outlet></router-outlet>
+    </main>
+
+    <!-- RIGHT PANEL (Task Details / Financial Overview) (Desktop) -->
+    <div
+      class="hidden xl:block h-full shrink-0 transition-all duration-300 overflow-hidden"
+      [class.w-96]="!taskSelectionService.isRightPanelCollapsed()"
+      [class.w-0]="taskSelectionService.isRightPanelCollapsed()"
+    >
+      <app-task-detail-panel></app-task-detail-panel>
   </div>
 
-  <!-- 1.bis LEFT SIDEBAR (Mobile Drawer) -->
+  <!-- Mobile Drawer for Left Sidebar -->
   @if (isMobileSidebarOpen) {
     <div class="fixed inset-0 z-50 lg:hidden flex">
       <!-- Backdrop -->
@@ -22,24 +44,6 @@
       </div>
     </div>
   }
-
-  <!-- 2. CENTER CONTENT (Header + Dynamic Router Outlet) -->
-  <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-    <app-header (toggleMobileSidebar)="isMobileSidebarOpen = !isMobileSidebarOpen"></app-header>
-
-    <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
-
-  <!-- 3. RIGHT PANEL (Task Details / Financial Overview) (Desktop) -->
-  <div
-    class="hidden xl:block h-full shrink-0 transition-all duration-300 overflow-hidden"
-    [class.w-96]="!taskSelectionService.isRightPanelCollapsed()"
-    [class.w-0]="taskSelectionService.isRightPanelCollapsed()"
-  >
-    <app-task-detail-panel></app-task-detail-panel>
-  </div>
 
   <!-- 3.bis RIGHT PANEL (Mobile/Tablet Slide-over) -->
   @if (taskSelectionService.isPanelOpen() && taskSelectionService.selectedTask()) {
