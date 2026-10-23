@@ -71,11 +71,40 @@ export class TasksComponent implements OnInit, OnDestroy {
     });
   }
 
+  searchQuery: string = '';
+
   get filteredTasks(): Task[] {
-    if (this.activeFilter === 'ALL') return this.tasks;
-    if (this.activeFilter === 'OVERDUE') return this.tasks.filter((t) => t.isOverdue);
-    if (this.activeFilter === 'BLOCKED') return this.tasks.filter((t) => t.isBlockedByDeps || t.status === 'BLOCKED');
-    return this.tasks.filter((t) => t.status === this.activeFilter);
+    let result = this.tasks;
+    if (this.activeFilter === 'OVERDUE') {
+      result = result.filter((t) => t.isOverdue);
+    } else if (this.activeFilter === 'BLOCKED') {
+      result = result.filter((t) => t.isBlockedByDeps || t.status === 'BLOCKED');
+    } else if (this.activeFilter !== 'ALL') {
+      result = result.filter((t) => t.status === this.activeFilter);
+    }
+
+    if (this.searchQuery.trim()) {
+      const q = this.searchQuery.trim().toLowerCase();
+      result = result
+        .filter((t) => {
+          const title = (t.title || '').toLowerCase();
+          const desc = (t.description || '').toLowerCase();
+          const proj = (t.project?.title || '').toLowerCase();
+          return title.includes(q) || desc.includes(q) || proj.includes(q);
+        })
+        .sort((a, b) => {
+          const aStarts = (a.title || '').toLowerCase().startsWith(q) ? 0 : 1;
+          const bStarts = (b.title || '').toLowerCase().startsWith(q) ? 0 : 1;
+          return aStarts - bStarts;
+        });
+    }
+
+    return result;
+  }
+
+  onSearchChange(query: string) {
+    this.searchQuery = query;
+    this.cdr.detectChanges();
   }
 
   setFilter(filter: string) {

@@ -10,6 +10,7 @@ import { TasksModule } from './modules/tasks/tasks.module';
 import { TimeTrackingModule } from './modules/time-tracking/time-tracking.module';
 import { FinanceModule } from './modules/finance/finance.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     TimeTrackingModule,
     FinanceModule,
     DashboardModule,
+    SearchModule,
   ],
   providers: [
     {

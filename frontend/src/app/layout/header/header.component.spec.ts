@@ -3,6 +3,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HeaderComponent } from './header.component';
 import { IconComponent } from '../../shared/components/icon/icon.component';
+import { FcfaPipe } from '../../shared/pipes/fcfa.pipe';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -10,7 +11,7 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [HeaderComponent, IconComponent],
+      declarations: [HeaderComponent, IconComponent, FcfaPipe],
       imports: [HttpClientTestingModule, RouterTestingModule],
     }).compileComponents();
 

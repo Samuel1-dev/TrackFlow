@@ -87,6 +87,32 @@
     >
       En retard
     </button>
+
+    <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block mx-1"></div>
+
+    <!-- Inline Filter Search Input -->
+    <div class="relative flex-1 min-w-[180px] max-w-xs sm:ml-auto">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+        <app-icon name="search" [size]="14"></app-icon>
+      </div>
+      <input
+        type="text"
+        [value]="searchQuery"
+        (input)="onSearchChange($any($event.target).value)"
+        placeholder="Filtrer les tâches..."
+        class="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-surface-cardDark border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+      />
+      @if (searchQuery) {
+        <button
+          type="button"
+          (click)="onSearchChange('')"
+          class="absolute inset-y-0 right-0 pr-2 flex items-center text-slate-400 hover:text-slate-600"
+          title="Effacer"
+        >
+          <app-icon name="x" [size]="12"></app-icon>
+        </button>
+      }
+    </div>
   </div>
 
   <!-- Tasks List Card -->
