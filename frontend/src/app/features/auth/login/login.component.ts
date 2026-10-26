@@ -13,12 +13,18 @@ export class LoginComponent {
   password = '';
   errorMessage = '';
   loading = false;
+  showPassword = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+    this.cdr.detectChanges();
+  }
 
   onSubmit() {
     if (!this.email || !this.password) return;

@@ -17,12 +17,18 @@ export class RegisterComponent {
   timezone = 'Africa/Porto-Novo';
   errorMessage = '';
   loading = false;
+  showPassword = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
    private cdr: ChangeDetectorRef,
   ) {}
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+    this.cdr.detectChanges();
+  }
 
   onSubmit() {
     if (!this.email || !this.password || !this.firstName || !this.lastName) return;
