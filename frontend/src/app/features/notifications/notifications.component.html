@@ -1,17 +1,17 @@
-<div class="space-y-6 max-w-5xl mx-auto pb-12">
+<div class="space-y-5 sm:space-y-6 max-w-5xl mx-auto pb-12">
   <!-- Top Page Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-surface-cardDark p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-    <div class="flex items-start gap-4">
-      <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-brand-500/20">
-        <app-icon name="bell" [size]="24"></app-icon>
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-surface-cardDark p-4 sm:p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+    <div class="flex items-start gap-3.5 sm:gap-4">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-brand-500/20">
+        <app-icon name="bell" [size]="22"></app-icon>
       </div>
       <div>
-        <div class="flex items-center gap-3">
-          <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Notifications du système
           </h1>
           @if (unreadCount > 0) {
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white shadow-sm">
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500 text-white shadow-sm">
               {{ unreadCount }} non lu{{ unreadCount > 1 ? 's' : '' }}
             </span>
           }
@@ -23,12 +23,12 @@
     </div>
 
     <!-- Header Actions -->
-    <div class="flex items-center gap-2.5 self-start sm:self-center">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
       <button
         type="button"
         (click)="refresh()"
         [disabled]="isLoading"
-        class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1.5"
+        class="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-1.5"
         title="Rafraîchir les notifications"
       >
         <app-icon name="clock" [size]="14"></app-icon>
@@ -39,7 +39,7 @@
         type="button"
         (click)="markAllAsRead()"
         [disabled]="unreadCount === 0"
-        class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-sm shadow-brand-600/20"
+        class="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-brand-600/20"
       >
         <app-icon name="check" [size]="14"></app-icon>
         <span>Tout marquer comme lu</span>
@@ -48,58 +48,58 @@
   </div>
 
   <!-- Metric Badges Overview -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
     <!-- Critiques -->
-    <div class="p-4 rounded-xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
+    <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Critiques</p>
-        <p class="text-xl font-black text-rose-600 dark:text-rose-400 mt-0.5">{{ counts.critical }}</p>
+        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Critiques</p>
+        <p class="text-lg sm:text-xl font-black text-rose-600 dark:text-rose-400 mt-0.5">{{ counts.critical }}</p>
       </div>
-      <div class="w-9 h-9 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
         <app-icon name="alert" [size]="18"></app-icon>
       </div>
     </div>
 
     <!-- Avertissements -->
-    <div class="p-4 rounded-xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
+    <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Avertissements</p>
-        <p class="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">{{ counts.warning }}</p>
+        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Avertissements</p>
+        <p class="text-lg sm:text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">{{ counts.warning }}</p>
       </div>
-      <div class="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
         <app-icon name="alert" [size]="18"></app-icon>
       </div>
     </div>
 
     <!-- Tâches en retard -->
-    <div class="p-4 rounded-xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
+    <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tâches en retard</p>
-        <p class="text-xl font-black text-brand-600 dark:text-brand-400 mt-0.5">{{ counts.overdueTasks }}</p>
+        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Tâches retard</p>
+        <p class="text-lg sm:text-xl font-black text-brand-600 dark:text-brand-400 mt-0.5">{{ counts.overdueTasks }}</p>
       </div>
-      <div class="w-9 h-9 rounded-lg bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
         <app-icon name="tasks" [size]="18"></app-icon>
       </div>
     </div>
 
     <!-- Alertes Budget -->
-    <div class="p-4 rounded-xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
+    <div class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Alertes Budget</p>
-        <p class="text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">{{ counts.budgetAlerts }}</p>
+        <p class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Alertes Budget</p>
+        <p class="text-lg sm:text-xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5">{{ counts.budgetAlerts }}</p>
       </div>
-      <div class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+      <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
         <app-icon name="budgets" [size]="18"></app-icon>
       </div>
     </div>
   </div>
 
   <!-- Filter Tabs -->
-  <div class="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800">
+  <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 border-b border-slate-200 dark:border-slate-800">
     <button
       type="button"
       (click)="setFilter('ALL')"
-      class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0"
+      class="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap"
       [class.bg-brand-600]="currentFilter === 'ALL'"
       [class.text-white]="currentFilter === 'ALL'"
       [class.shadow-sm]="currentFilter === 'ALL'"
@@ -117,7 +117,7 @@
     <button
       type="button"
       (click)="setFilter('UNREAD')"
-      class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0"
+      class="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap"
       [class.bg-brand-600]="currentFilter === 'UNREAD'"
       [class.text-white]="currentFilter === 'UNREAD'"
       [class.shadow-sm]="currentFilter === 'UNREAD'"
@@ -135,7 +135,7 @@
     <button
       type="button"
       (click)="setFilter('TASKS')"
-      class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0"
+      class="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap"
       [class.bg-brand-600]="currentFilter === 'TASKS'"
       [class.text-white]="currentFilter === 'TASKS'"
       [class.shadow-sm]="currentFilter === 'TASKS'"
@@ -154,7 +154,7 @@
     <button
       type="button"
       (click)="setFilter('BUDGETS')"
-      class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0"
+      class="px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 shrink-0 whitespace-nowrap"
       [class.bg-brand-600]="currentFilter === 'BUDGETS'"
       [class.text-white]="currentFilter === 'BUDGETS'"
       [class.shadow-sm]="currentFilter === 'BUDGETS'"
@@ -176,8 +176,8 @@
     <!-- Skeleton Loading -->
     <div class="space-y-3">
       @for (i of [1, 2, 3]; track i) {
-        <div class="p-5 rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 animate-pulse flex items-start gap-4">
-          <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700"></div>
+        <div class="p-4 sm:p-5 rounded-2xl bg-white dark:bg-surface-cardDark border border-slate-100 dark:border-slate-800 animate-pulse flex items-start gap-4">
+          <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 shrink-0"></div>
           <div class="flex-1 space-y-2">
             <div class="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
             <div class="h-3 bg-slate-200 dark:bg-slate-700 rounded w-3/4"></div>
@@ -187,11 +187,11 @@
     </div>
   } @else if (filteredNotifications.length === 0) {
     <!-- Empty State -->
-    <div class="bg-white dark:bg-surface-cardDark rounded-2xl border border-slate-100 dark:border-slate-800 p-12 text-center shadow-sm">
-      <div class="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-4 ring-8 ring-emerald-50/50 dark:ring-emerald-950/20">
+    <div class="bg-white dark:bg-surface-cardDark rounded-2xl border border-slate-100 dark:border-slate-800 p-8 sm:p-12 text-center shadow-sm">
+      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-4 ring-8 ring-emerald-50/50 dark:ring-emerald-950/20">
         <app-icon name="check" [size]="28" [strokeWidth]="2.5"></app-icon>
       </div>
-      <h3 class="text-base font-bold text-slate-900 dark:text-white">
+      <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
         Toutes les notifications sont à jour
       </h3>
       <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1.5">
@@ -211,82 +211,85 @@
     <div class="space-y-3">
       @for (item of filteredNotifications; track item.id) {
         <div
-          class="group relative p-5 rounded-2xl bg-white dark:bg-surface-cardDark border shadow-sm transition-all hover:shadow-md cursor-pointer"
+          class="group relative p-4 sm:p-5 rounded-2xl bg-white dark:bg-surface-cardDark border shadow-sm transition-all hover:shadow-md cursor-pointer"
           [ngClass]="[
             getCardTheme(item).border,
             item.isRead ? 'opacity-75 hover:opacity-100 bg-slate-50/50 dark:bg-surface-cardDark/50' : 'bg-white dark:bg-surface-cardDark'
           ]"
           (click)="onActionClick(item)"
         >
-          <div class="flex items-start gap-4">
-            <!-- Icon Avatar -->
-            <div
-              class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
-              [ngClass]="[getCardTheme(item).iconBg, getCardTheme(item).iconColor]"
-            >
-              <app-icon [name]="getIconName(item)" [size]="20"></app-icon>
-            </div>
-
-            <!-- Content -->
-            <div class="flex-1 min-w-0">
-              <div class="flex flex-wrap items-center gap-2 mb-1">
-                <!-- Severity Badge -->
-                <span
-                  class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider"
-                  [ngClass]="getSeverityBadge(item.severity).class"
-                >
-                  {{ getSeverityBadge(item.severity).label }}
-                </span>
-
-                <!-- Title -->
-                <h4 class="text-sm font-bold text-slate-900 dark:text-white truncate">
-                  {{ item.title }}
-                </h4>
-
-                <!-- Unread Pulse Dot -->
-                @if (!item.isRead) {
-                  <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500 text-white">
-                    Nouveau
-                  </span>
-                }
-
-                <span class="text-xs text-slate-400 dark:text-slate-500 ml-auto shrink-0">
-                  {{ formatDate(item.createdAt) }}
-                </span>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <!-- Left Info Block -->
+            <div class="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+              <!-- Icon Avatar -->
+              <div
+                class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                [ngClass]="[getCardTheme(item).iconBg, getCardTheme(item).iconColor]"
+              >
+                <app-icon [name]="getIconName(item)" [size]="20"></app-icon>
               </div>
 
-              <!-- Message Body -->
-              <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                {{ item.message }}
-              </p>
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <!-- Severity Badge -->
+                  <span
+                    class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider shrink-0"
+                    [ngClass]="getSeverityBadge(item.severity).class"
+                  >
+                    {{ getSeverityBadge(item.severity).label }}
+                  </span>
 
-              <!-- Extra Meta Pills (if available) -->
-              @if (item.metadata) {
-                <div class="flex flex-wrap items-center gap-2 mt-2">
-                  @if (item.metadata['projectName']) {
-                    <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
-                      <app-icon name="projects" [size]="11"></app-icon>
-                      {{ item.metadata['projectName'] }}
+                  <!-- Title -->
+                  <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white break-words">
+                    {{ item.title }}
+                  </h4>
+
+                  <!-- Unread Pulse Dot -->
+                  @if (!item.isRead) {
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500 text-white shrink-0">
+                      Nouveau
                     </span>
                   }
-                  @if (item.metadata['daysOverdue'] !== undefined) {
-                    <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold">
-                      <app-icon name="clock" [size]="11"></app-icon>
-                      {{ item.metadata['daysOverdue'] === 0 ? "Aujourd'hui" : item.metadata['daysOverdue'] + ' jour(s) de retard' }}
-                    </span>
-                  }
-                  @if (item.metadata['spentPercentage'] !== undefined) {
-                    <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 font-bold">
-                      <app-icon name="budgets" [size]="11"></app-icon>
-                      Consommé à {{ item.metadata['spentPercentage'] }}%
-                    </span>
-                  }
+
+                  <span class="text-[11px] text-slate-400 dark:text-slate-500 ml-auto shrink-0">
+                    {{ formatDate(item.createdAt) }}
+                  </span>
                 </div>
-              }
+
+                <!-- Message Body -->
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed break-words">
+                  {{ item.message }}
+                </p>
+
+                <!-- Extra Meta Pills (if available) -->
+                @if (item.metadata) {
+                  <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
+                    @if (item.metadata['projectName']) {
+                      <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">
+                        <app-icon name="projects" [size]="11"></app-icon>
+                        <span class="truncate max-w-[150px] sm:max-w-none">{{ item.metadata['projectName'] }}</span>
+                      </span>
+                    }
+                    @if (item.metadata['daysOverdue'] !== undefined) {
+                      <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-bold">
+                        <app-icon name="clock" [size]="11"></app-icon>
+                        {{ item.metadata['daysOverdue'] === 0 ? "Aujourd'hui" : item.metadata['daysOverdue'] + ' j de retard' }}
+                      </span>
+                    }
+                    @if (item.metadata['spentPercentage'] !== undefined) {
+                      <span class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 font-bold">
+                        <app-icon name="budgets" [size]="11"></app-icon>
+                        Consommé à {{ item.metadata['spentPercentage'] }}%
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
             </div>
 
-            <!-- Right Actions -->
-            <div class="flex items-center gap-2 shrink-0 self-center">
+            <!-- Right Actions (clean full width on mobile with divider, aligned on desktop) -->
+            <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pl-13 sm:pl-0 pt-2 sm:pt-0 border-t border-slate-100 dark:border-slate-800/80 sm:border-0 shrink-0">
               <button
                 type="button"
                 (click)="onActionClick(item, $event)"
@@ -301,7 +304,7 @@
                 <button
                   type="button"
                   (click)="markAsRead(item, $event)"
-                  class="p-2 rounded-xl text-slate-400 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  class="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   title="Marquer comme lu"
                 >
                   <app-icon name="check" [size]="14"></app-icon>

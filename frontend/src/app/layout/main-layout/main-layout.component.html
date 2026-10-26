@@ -13,7 +13,7 @@
     </div>
 
     <!-- CENTER CONTENT (Dynamic Router Outlet) -->
-    <main class="flex-1 overflow-y-auto min-w-0 h-full px-4 sm:px-6 lg:px-8 py-6">
+    <main class="flex-1 overflow-y-auto min-w-0 h-full px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
       <router-outlet></router-outlet>
     </main>
 
@@ -64,17 +64,17 @@
   <!-- Quick Action Modals -->
   <!-- A. Create Task Modal -->
   @if (taskSelectionService.isCreateModalOpen()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div (click)="taskSelectionService.closeCreateTask()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-      <div class="relative w-full max-w-lg bg-white dark:bg-surface-cardDark rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-6 z-10 animate-in zoom-in-95 duration-150">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Créer une nouvelle tâche</h3>
+      <div class="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-white dark:bg-surface-cardDark rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 z-10 animate-in zoom-in-95 duration-150 overflow-hidden">
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Créer une nouvelle tâche</h3>
           <button (click)="taskSelectionService.closeCreateTask()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white">
             <app-icon name="x" [size]="18"></app-icon>
           </button>
         </div>
 
-        <form (ngSubmit)="submitCreateTask()" class="space-y-4">
+        <form (ngSubmit)="submitCreateTask()" class="p-4 sm:p-6 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Titre de la tâche *</label>
             <input
@@ -98,7 +98,7 @@
             ></textarea>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Projet</label>
               <select
@@ -128,7 +128,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Échéance</label>
               <input
@@ -174,17 +174,17 @@
 
   <!-- B. Create Expense Modal -->
   @if (taskSelectionService.isExpenseModalOpen()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div (click)="taskSelectionService.closeCreateExpense()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-      <div class="relative w-full max-w-md bg-white dark:bg-surface-cardDark rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-6 z-10 animate-in zoom-in-95 duration-150">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Ajouter une dépense</h3>
+      <div class="relative w-full max-w-md max-h-[90vh] flex flex-col bg-white dark:bg-surface-cardDark rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 z-10 animate-in zoom-in-95 duration-150 overflow-hidden">
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Ajouter une dépense</h3>
           <button (click)="taskSelectionService.closeCreateExpense()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white">
             <app-icon name="x" [size]="18"></app-icon>
           </button>
         </div>
 
-        <form (ngSubmit)="submitCreateExpense()" class="space-y-4">
+        <form (ngSubmit)="submitCreateExpense()" class="p-4 sm:p-6 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Catégorie *</label>
             <select
@@ -245,17 +245,17 @@
 
   <!-- C. Create Budget Modal -->
   @if (taskSelectionService.isBudgetModalOpen()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       <div (click)="taskSelectionService.closeCreateBudget()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-      <div class="relative w-full max-w-md bg-white dark:bg-surface-cardDark rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-6 z-10 animate-in zoom-in-95 duration-150">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5">
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Créer un nouveau budget</h3>
+      <div class="relative w-full max-w-md max-h-[90vh] flex flex-col bg-white dark:bg-surface-cardDark rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 z-10 animate-in zoom-in-95 duration-150 overflow-hidden">
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Créer un nouveau budget</h3>
           <button (click)="taskSelectionService.closeCreateBudget()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white">
             <app-icon name="x" [size]="18"></app-icon>
           </button>
         </div>
 
-        <form (ngSubmit)="submitCreateBudget()" class="space-y-4">
+        <form (ngSubmit)="submitCreateBudget()" class="p-4 sm:p-6 space-y-4 overflow-y-auto">
           <div>
             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Période</label>
             <select
@@ -268,7 +268,7 @@
             </select>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Date début</label>
               <input
@@ -322,7 +322,7 @@
             <div class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800/80 text-rose-700 dark:text-rose-300 text-xs">
               <p class="font-semibold">{{ budgetErrorMessage }}</p>
               @if (budgetConflictDetected) {
-                <div class="mt-2.5 pt-2 border-t border-rose-200 dark:border-rose-800/80 flex items-center justify-between gap-2">
+                <div class="mt-2.5 pt-2 border-t border-rose-200 dark:border-rose-800/80 flex items-center justify-between gap-2 flex-wrap">
                   <span class="text-[11px] font-medium">Voulez-vous écraser et remplacer l'ancien budget ?</span>
                   <button
                     type="button"
