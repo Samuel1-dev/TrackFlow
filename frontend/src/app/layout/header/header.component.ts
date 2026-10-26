@@ -16,6 +16,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
 import { SearchService } from '../../core/services/search.service';
+import { NotificationService } from '../../core/services/notification.service';
 import {
   SearchResponse,
   SearchResultItem,
@@ -37,6 +38,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isThemeMenuOpen = false;
   isUserMenuOpen = false;
 
+  // ─── État des notifications ────────────────────────────────────────────────
+  unreadNotificationCount: number = 0;
+  private notifSub?: Subscription;
+
   // ─── État de la recherche en temps réel ─────────────────────────────────────
   searchQuery: string = '';
   searchType: SearchScopeType = 'all';
@@ -54,6 +59,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     public themeService: ThemeService,
     public taskSelectionService: TaskSelectionService,
+    public notificationService: NotificationService,
     private searchService: SearchService,
     private router: Router,
     private cdr: ChangeDetectorRef,
@@ -70,10 +76,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.searchPage = 1;
         this.executeSearch(query);
       });
+
+    // Écoute des notifications système (tâches en retard, budgets dépassés)
+    this.notificationService.loadNotifications();
+    this.notifSub = this.notificationService.unreadCount$.subscribe((count) => {
+      this.unreadNotificationCount = count;
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy() {
     this.searchSub?.unsubscribe();
+    this.notifSub?.unsubscribe();
   }
 
   // ─── Raccourcis clavier & fermeture au clic extérieur ───────────────────────

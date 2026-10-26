@@ -7,6 +7,7 @@ import { TasksComponent } from './features/tasks/tasks.component';
 import { ProjectsComponent } from './features/projects/projects.component';
 import { BudgetsComponent } from './features/finance/budgets/budgets.component';
 import { ExpensesComponent } from './features/finance/expenses/expenses.component';
+import { NotificationsComponent } from './features/notifications/notifications.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 
@@ -25,6 +26,7 @@ const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'tasks', component: TasksComponent },
       { path: 'projects', component: ProjectsComponent },
+      { path: 'notifications', component: NotificationsComponent },
       { path: 'finance/budgets', component: BudgetsComponent },
       { path: 'finance/expenses', component: ExpensesComponent },
     ],

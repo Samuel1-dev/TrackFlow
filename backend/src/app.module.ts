@@ -11,6 +11,7 @@ import { TimeTrackingModule } from './modules/time-tracking/time-tracking.module
 import { FinanceModule } from './modules/finance/finance.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { SearchModule } from './modules/search/search.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SearchModule } from './modules/search/search.module';
     FinanceModule,
     DashboardModule,
     SearchModule,
+    NotificationsModule,
   ],
   providers: [
     {

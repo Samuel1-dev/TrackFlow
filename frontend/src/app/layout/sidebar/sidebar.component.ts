@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,6 +16,7 @@ export class SidebarComponent {
   constructor(
     private router: Router,
     public taskSelectionService: TaskSelectionService,
+    public notificationService: NotificationService,
   ) {}
 
   get isCollapsed(): boolean {
