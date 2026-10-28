@@ -271,17 +271,7 @@
       <app-icon name="search" [size]="18"></app-icon>
     </button>
 
-    <!-- Desktop Right Panel Collapse/Expand Toggle -->
-    <button
-      (click)="toggleRightPanel()"
-      class="hidden xl:flex p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-300 dark:hover:border-brand-700 transition-all items-center justify-center"
-      [class.text-brand-600]="!isRightPanelCollapsed"
-      [class.dark:text-brand-400]="!isRightPanelCollapsed"
-      [title]="isRightPanelCollapsed ? 'Déplier le panneau de détails' : 'Plier le panneau de détails'"
-    >
-      <app-icon name="panel-right" [size]="18"></app-icon>
-    </button>
-
+    
     <!-- Theme Toggle Button (Light / Dark / System) -->
     <div class="relative">
       <button
