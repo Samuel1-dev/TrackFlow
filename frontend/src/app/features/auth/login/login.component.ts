@@ -40,7 +40,7 @@ export class LoginComponent implements OnDestroy {
   sentCountdown = 5;
   private sentTimer: any = null;
 
-  timeLeft = 300;
+  timeLeft = 60;
   private resendTimer: any = null;
 
   constructor(
@@ -165,11 +165,11 @@ export class LoginComponent implements OnDestroy {
     this.resetCode = '';
     this.errorMessage = '';
     this.successMessage = '';
-    this.startResendCountdown(300);
+    this.startResendCountdown(60);
     this.cdr.detectChanges();
   }
 
-  private startResendCountdown(seconds: number = 300): void {
+  private startResendCountdown(seconds: number = 60): void {
     this.clearResendTimer();
     this.timeLeft = seconds;
     this.resendTimer = setInterval(() => {
@@ -199,7 +199,7 @@ export class LoginComponent implements OnDestroy {
         this.loading = false;
         this.resetCode = '';
         this.successMessage = 'Un nouveau code a été envoyé à votre adresse email.';
-        this.startResendCountdown(300);
+        this.startResendCountdown(60);
         this.cdr.detectChanges();
       },
       error: (err) => {
