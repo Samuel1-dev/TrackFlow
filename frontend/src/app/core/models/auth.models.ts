@@ -27,3 +27,28 @@ export interface RegisterDto {
   timezone?: string;
   currency?: string;
 }
+
+export interface SendVerificationOtpDto {
+  email: string;
+}
+
+export interface VerifyEmailRegisterDto extends RegisterDto {
+  code: string;
+}
+
+export interface SendResetOtpDto {
+  email: string;
+}
+
+export interface VerifyResetOtpDto {
+  email: string;
+  code: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  code: string;
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}

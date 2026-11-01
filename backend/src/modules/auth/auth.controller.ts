@@ -13,6 +13,12 @@ import type { Response, Request, CookieOptions } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { SendVerificationOtpDto } from './dto/send-verification-otp.dto';
+import { VerifyEmailRegisterDto } from './dto/verify-email-register.dto';
+import { SendResetOtpDto } from './dto/send-reset-otp.dto';
+import { VerifyResetOtpDto } from './dto/verify-reset-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../common/decorators/public.decorator';
 
 const REFRESH_COOKIE = 'refreshToken';
@@ -49,7 +55,63 @@ export class AuthController {
   }
 
   @Public()
-  @ApiOperation({ summary: 'Inscription d’un nouvel utilisateur' })
+  @Throttle({ default: { limit: 3, ttl: 300000 } })
+  @ApiOperation({ summary: 'Envoi du code OTP de validation par email' })
+  @ApiResponse({ status: 200, description: 'Code envoyé avec succès' })
+  @HttpCode(HttpStatus.OK)
+  @Post('send-verification-otp')
+  async sendVerificationOtp(@Body() dto: SendVerificationOtpDto) {
+    return this.authService.sendVerificationOtp(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiOperation({ summary: 'Validation du code OTP et création du compte' })
+  @ApiResponse({ status: 201, description: 'Compte créé et connecté avec succès' })
+  @Post('verify-email')
+  async verifyEmail(
+    @Body() dto: VerifyEmailRegisterDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { user, accessToken, refreshToken } =
+      await this.authService.verifyEmailAndRegister(dto);
+
+    this.setRefreshCookie(response, refreshToken);
+    return { user, accessToken, refreshToken };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 300000 } })
+  @ApiOperation({ summary: 'Envoi du code OTP pour mot de passe oublié' })
+  @ApiResponse({ status: 200, description: 'Code de réinitialisation envoyé' })
+  @HttpCode(HttpStatus.OK)
+  @Post('send-reset-otp')
+  async sendResetOtp(@Body() dto: SendResetOtpDto) {
+    return this.authService.sendPasswordResetOtp(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiOperation({ summary: 'Vérification du code OTP de réinitialisation' })
+  @ApiResponse({ status: 200, description: 'Code OTP valide' })
+  @HttpCode(HttpStatus.OK)
+  @Post('verify-reset-otp')
+  async verifyResetOtp(@Body() dto: VerifyResetOtpDto) {
+    return this.authService.verifyResetOtp(dto);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiOperation({ summary: 'Réinitialisation du mot de passe avec code OTP et ancien mot de passe' })
+  @ApiResponse({ status: 200, description: 'Mot de passe réinitialisé' })
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
+  }
+
+  @Public()
+  @ApiOperation({ summary: 'Inscription classique d’un nouvel utilisateur' })
   @ApiResponse({ status: 201, description: 'Utilisateur créé avec succès' })
   @Post('register')
   async register(
@@ -101,7 +163,6 @@ export class AuthController {
         refreshToken: tokens.refreshToken,
       };
     } catch (error) {
-      // Token invalide, expiré ou révoqué : on supprime le cookie devenu inutile
       response.clearCookie(REFRESH_COOKIE, this.cookieOptions());
       throw error;
     }

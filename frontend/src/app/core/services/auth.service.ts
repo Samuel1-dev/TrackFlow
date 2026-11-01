@@ -1,8 +1,15 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, of, throwError } from 'rxjs';
+import { Observable, tap, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
-import { User, AuthResponse, LoginDto, RegisterDto } from '../models/auth.models';
+import {
+  User,
+  AuthResponse,
+  LoginDto,
+  RegisterDto,
+  VerifyEmailRegisterDto,
+  ResetPasswordDto,
+} from '../models/auth.models';
 
 @Injectable({
   providedIn: 'root',
@@ -37,6 +44,39 @@ export class AuthService {
     } catch {
       return null;
     }
+  }
+
+  sendVerificationOtp(email: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/send-verification-otp`, {
+      email,
+    });
+  }
+
+  verifyEmailAndRegister(dto: VerifyEmailRegisterDto): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/verify-email`, dto).pipe(
+      tap((res) => {
+        if (res.data) {
+          this.handleAuthSuccess(res.data);
+        }
+      }),
+    );
+  }
+
+  sendPasswordResetOtp(email: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/send-reset-otp`, {
+      email,
+    });
+  }
+
+  verifyResetOtp(email: string, code: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/verify-reset-otp`, {
+      email,
+      code,
+    });
+  }
+
+  resetPassword(dto: ResetPasswordDto): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/reset-password`, dto);
   }
 
   register(dto: RegisterDto): Observable<any> {
