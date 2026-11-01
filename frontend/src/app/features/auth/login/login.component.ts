@@ -26,10 +26,8 @@ export class LoginComponent implements OnDestroy {
   // Forgot password fields
   resetEmail = '';
   resetCode = '';
-  oldPassword = '';
   newPassword = '';
   confirmPassword = '';
-  showOldPassword = false;
   showNewPassword = false;
   showConfirmPassword = false;
 
@@ -60,11 +58,6 @@ export class LoginComponent implements OnDestroy {
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
-    this.cdr.detectChanges();
-  }
-
-  toggleOldPasswordVisibility(): void {
-    this.showOldPassword = !this.showOldPassword;
     this.cdr.detectChanges();
   }
 
@@ -111,7 +104,6 @@ export class LoginComponent implements OnDestroy {
     this.step = 'forgot-email';
     this.resetEmail = this.email;
     this.resetCode = '';
-    this.oldPassword = '';
     this.newPassword = '';
     this.confirmPassword = '';
     this.errorMessage = '';
@@ -250,7 +242,7 @@ export class LoginComponent implements OnDestroy {
   }
 
   onResetPassword(): void {
-    if (!this.oldPassword || !this.newPassword || !this.confirmPassword) {
+    if (!this.newPassword || !this.confirmPassword) {
       this.errorMessage = 'Veuillez remplir tous les champs du formulaire';
       this.cdr.detectChanges();
       return;
@@ -275,7 +267,6 @@ export class LoginComponent implements OnDestroy {
       .resetPassword({
         email: this.resetEmail.trim(),
         code: this.resetCode.trim(),
-        oldPassword: this.oldPassword,
         newPassword: this.newPassword,
         confirmPassword: this.confirmPassword,
       })

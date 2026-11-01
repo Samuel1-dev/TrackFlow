@@ -416,7 +416,6 @@ describe('AuthService', () => {
     const dto = {
       email: 'test@example.com',
       code: '123456',
-      oldPassword: 'secret123',
       newPassword: 'newSecret456!',
       confirmPassword: 'newSecret456!',
     };
@@ -472,17 +471,6 @@ describe('AuthService', () => {
       expect(prisma.otpCode.update).toHaveBeenCalledWith(
         expect.objectContaining({ data: { attempts: { increment: 1 } } }),
       );
-    });
-
-    it('should throw BadRequestException if old password is wrong', async () => {
-      prisma.user.findUnique.mockResolvedValue(mockUser);
-      prisma.otpCode.findFirst.mockResolvedValue(
-        makeOtp({ type: OtpType.PASSWORD_RESET }),
-      );
-
-      await expect(
-        service.resetPassword({ ...dto, oldPassword: 'wrongOldPassword' }),
-      ).rejects.toThrow(BadRequestException);
     });
 
     it('should update password and revoke sessions on success', async () => {

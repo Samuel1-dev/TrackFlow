@@ -258,34 +258,9 @@
       </div>
     }
 
-    <!-- ─── ÉTAPE 5 : Formulaire ancien + nouveau mot de passe ─────────── -->
+    <!-- ─── ÉTAPE 5 : Formulaire nouveau mot de passe ────────────────── -->
     @if (step === 'forgot-reset') {
       <div class="space-y-4">
-        <!-- Champ Ancien mot de passe -->
-        <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
-            Ancien mot de passe
-          </label>
-          <div class="relative flex items-center">
-            <input
-              [type]="showOldPassword ? 'text' : 'password'"
-              [(ngModel)]="oldPassword"
-              name="oldPassword"
-              required
-              placeholder="••••••••"
-              class="w-full pl-4 pr-11 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-            />
-            <button
-              type="button"
-              (click)="toggleOldPasswordVisibility()"
-              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
-              [title]="showOldPassword ? 'Masquer' : 'Afficher'"
-            >
-              <app-icon [name]="showOldPassword ? 'eye-off' : 'eye'" [size]="18"></app-icon>
-            </button>
-          </div>
-        </div>
-
         <!-- Champ Nouveau mot de passe -->
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">
@@ -341,7 +316,7 @@
         <button
           type="button"
           (click)="onResetPassword()"
-          [disabled]="loading || !oldPassword || !newPassword || !confirmPassword"
+          [disabled]="loading || !newPassword || !confirmPassword"
           class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-500/25 transition-all disabled:opacity-50 cursor-pointer"
         >
           {{ loading ? 'Mise à jour en cours...' : 'Enregistrer le nouveau mot de passe' }}

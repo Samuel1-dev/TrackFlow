@@ -13,11 +13,6 @@ export class ResetPasswordDto {
   @Length(6, 6, { message: 'Le code doit comporter exactement 6 chiffres' })
   code!: string;
 
-  @ApiProperty({ example: 'OldPassword123' })
-  @IsNotEmpty({ message: "L'ancien mot de passe est requis" })
-  @IsString()
-  oldPassword!: string;
-
   @ApiProperty({ example: 'NewSecret123', minLength: 6 })
   @IsNotEmpty({ message: 'Le nouveau mot de passe est requis' })
   @IsString()

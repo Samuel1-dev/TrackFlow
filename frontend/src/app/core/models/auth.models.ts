@@ -48,7 +48,6 @@ export interface VerifyResetOtpDto {
 export interface ResetPasswordDto {
   email: string;
   code: string;
-  oldPassword: string;
   newPassword: string;
   confirmPassword: string;
 }

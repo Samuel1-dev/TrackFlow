@@ -120,7 +120,9 @@ export class AuthService {
     });
 
     if (!otpRecord) {
-      throw new BadRequestException('Aucun code de validation actif. Veuillez demander un nouveau code.');
+      throw new BadRequestException(
+        'Aucun code de validation actif. Veuillez demander un nouveau code.',
+      );
     }
 
     if (otpRecord.attempts >= 5) {
@@ -342,15 +344,6 @@ export class AuthService {
           ? `Code invalide. Il vous reste ${attemptsLeft} tentative(s).`
           : 'Code bloqué après trop de tentatives. Veuillez demander un nouveau code.',
       );
-    }
-
-    // Vérification de l'ancien mot de passe
-    const isValidOldPassword = await bcrypt.compare(
-      dto.oldPassword,
-      user.passwordHash,
-    );
-    if (!isValidOldPassword) {
-      throw new BadRequestException("L'ancien mot de passe est incorrect");
     }
 
     const newPasswordHash = await bcrypt.hash(dto.newPassword, 10);
