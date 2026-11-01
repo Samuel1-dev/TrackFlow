@@ -225,15 +225,27 @@
           </p>
         }
 
-        <!-- Bouton Valider -->
-        <button
-          type="button"
-          (click)="onVerifyCode()"
-          [disabled]="loading || !code || code.length !== 6"
-          class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-500/25 transition-all disabled:opacity-50 cursor-pointer"
-        >
-          {{ loading ? 'Validation en cours...' : 'Valider et créer mon compte' }}
-        </button>
+        <!-- Bouton Valider ou Renvoyer selon expiration -->
+        @if (timeLeft <= 0) {
+          <button
+            type="button"
+            (click)="resendCode()"
+            [disabled]="loading"
+            class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <app-icon name="mail" [size]="16"></app-icon>
+            <span>{{ loading ? 'Envoi en cours...' : 'Renvoyer un nouveau code' }}</span>
+          </button>
+        } @else {
+          <button
+            type="button"
+            (click)="onVerifyCode()"
+            [disabled]="loading || !code || code.length !== 6"
+            class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-500/25 transition-all disabled:opacity-50 cursor-pointer"
+          >
+            {{ loading ? 'Validation en cours...' : 'Valider et créer mon compte' }}
+          </button>
+        }
 
         <!-- Bouton Renvoyer le code -->
         <div class="flex items-center justify-between pt-1">

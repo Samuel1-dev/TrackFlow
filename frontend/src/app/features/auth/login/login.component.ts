@@ -198,9 +198,11 @@ export class LoginComponent implements OnDestroy {
       next: () => {
         this.loading = false;
         this.resetCode = '';
-        this.successMessage = 'Un nouveau code a été envoyé à votre adresse email.';
-        this.startResendCountdown(60);
+        this.clearResendTimer();
+        this.step = 'forgot-sent';
+        this.sentCountdown = 5;
         this.cdr.detectChanges();
+        this.startSentCountdown();
       },
       error: (err) => {
         this.loading = false;
