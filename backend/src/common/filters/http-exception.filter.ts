@@ -23,18 +23,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     let message = 'Une erreur interne est survenue';
-    let errors: any = undefined;
+    let errors: string[] | undefined = undefined;
 
     if (exception instanceof HttpException) {
       const res = exception.getResponse();
       if (typeof res === 'string') {
         message = res;
       } else if (typeof res === 'object' && res !== null) {
-        const resObj = res as Record<string, any>;
-        message = resObj.message || exception.message;
-        if (Array.isArray(resObj.message)) {
-          errors = resObj.message;
+        const resObj = res as Record<string, unknown>;
+        const rawMessage = resObj.message;
+        if (Array.isArray(rawMessage)) {
+          errors = rawMessage as string[];
           message = 'Validation failed';
+        } else if (typeof rawMessage === 'string') {
+          message = rawMessage;
+        } else {
+          message = exception.message;
         }
       }
     } else if (exception instanceof Error) {

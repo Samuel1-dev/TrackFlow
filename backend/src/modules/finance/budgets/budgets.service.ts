@@ -18,16 +18,23 @@ export class BudgetsService {
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
   private async ensureOwnership(userId: string, budgetId: string) {
-    const budget = await this.prisma.budget.findUnique({ where: { id: budgetId } });
+    const budget = await this.prisma.budget.findUnique({
+      where: { id: budgetId },
+    });
     if (!budget) throw new NotFoundException('Budget introuvable');
-    if (budget.userId !== userId) throw new ForbiddenException('Accès interdit à ce budget');
+    if (budget.userId !== userId)
+      throw new ForbiddenException('Accès interdit à ce budget');
     return budget;
   }
 
   /**
    * Calcule le total des dépenses pour une période donnée.
    */
-  private async computeTotalSpent(userId: string, startDate: Date, endDate: Date): Promise<number> {
+  private async computeTotalSpent(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<number> {
     const result = await this.prisma.expense.aggregate({
       where: {
         userId,
@@ -53,9 +60,7 @@ export class BudgetsService {
         userId,
         periodType,
         id: excludeBudgetId ? { not: excludeBudgetId } : undefined,
-        OR: [
-          { startDate: { lte: endDate }, endDate: { gte: startDate } },
-        ],
+        OR: [{ startDate: { lte: endDate }, endDate: { gte: startDate } }],
       },
     });
 
@@ -73,12 +78,14 @@ export class BudgetsService {
     const endDate = new Date(dto.endDate);
 
     if (endDate <= startDate) {
-      throw new BadRequestException('La date de fin doit être postérieure à la date de début');
+      throw new BadRequestException(
+        'La date de fin doit être postérieure à la date de début',
+      );
     }
 
     if (dto.savingsTarget > dto.initialAmount) {
       throw new BadRequestException(
-        'L\'objectif d\'épargne ne peut pas dépasser le montant initial du budget',
+        "L'objectif d'épargne ne peut pas dépasser le montant initial du budget",
       );
     }
 
@@ -87,9 +94,7 @@ export class BudgetsService {
       where: {
         userId,
         periodType: dto.periodType,
-        OR: [
-          { startDate: { lte: endDate }, endDate: { gte: startDate } },
-        ],
+        OR: [{ startDate: { lte: endDate }, endDate: { gte: startDate } }],
       },
     });
 
@@ -129,19 +134,29 @@ export class BudgetsService {
   async update(userId: string, id: string, dto: UpdateBudgetDto) {
     const existing = await this.ensureOwnership(userId, id);
 
-    const startDate = dto.startDate ? new Date(dto.startDate) : existing.startDate;
+    const startDate = dto.startDate
+      ? new Date(dto.startDate)
+      : existing.startDate;
     const endDate = dto.endDate ? new Date(dto.endDate) : existing.endDate;
 
     if (endDate <= startDate) {
-      throw new BadRequestException('La date de fin doit être postérieure à la date de début');
+      throw new BadRequestException(
+        'La date de fin doit être postérieure à la date de début',
+      );
     }
 
-    const initialAmount = dto.initialAmount !== undefined ? dto.initialAmount : FinanceCalculator.toNumber(existing.initialAmount);
-    const savingsTarget = dto.savingsTarget !== undefined ? dto.savingsTarget : FinanceCalculator.toNumber(existing.savingsTarget);
+    const initialAmount =
+      dto.initialAmount !== undefined
+        ? dto.initialAmount
+        : FinanceCalculator.toNumber(existing.initialAmount);
+    const savingsTarget =
+      dto.savingsTarget !== undefined
+        ? dto.savingsTarget
+        : FinanceCalculator.toNumber(existing.savingsTarget);
 
     if (savingsTarget > initialAmount) {
       throw new BadRequestException(
-        'L\'objectif d\'épargne ne peut pas dépasser le montant initial du budget',
+        "L'objectif d'épargne ne peut pas dépasser le montant initial du budget",
       );
     }
 
@@ -186,11 +201,16 @@ export class BudgetsService {
     if (!budget) {
       return {
         activeBudget: null,
-        message: 'Aucun budget actif pour la période en cours. Créez un budget pour commencer le suivi.',
+        message:
+          'Aucun budget actif pour la période en cours. Créez un budget pour commencer le suivi.',
       };
     }
 
-    const totalSpent = await this.computeTotalSpent(userId, budget.startDate, budget.endDate);
+    const totalSpent = await this.computeTotalSpent(
+      userId,
+      budget.startDate,
+      budget.endDate,
+    );
 
     // Répartition par catégorie
     const expenses = await this.prisma.expense.findMany({
@@ -214,7 +234,10 @@ export class BudgetsService {
       currency: budget.currency,
     });
 
-    const breakdown = FinanceCalculator.buildExpensesBreakdown(expensesForBreakdown, totalSpent);
+    const breakdown = FinanceCalculator.buildExpensesBreakdown(
+      expensesForBreakdown,
+      totalSpent,
+    );
 
     return {
       activeBudget: {
@@ -245,7 +268,11 @@ export class BudgetsService {
 
     const enriched = await Promise.all(
       budgets.map(async (b) => {
-        const totalSpent = await this.computeTotalSpent(userId, b.startDate, b.endDate);
+        const totalSpent = await this.computeTotalSpent(
+          userId,
+          b.startDate,
+          b.endDate,
+        );
         const indicators = FinanceCalculator.buildBudgetIndicators({
           initialAmount: b.initialAmount,
           savingsTarget: b.savingsTarget,
@@ -265,7 +292,11 @@ export class BudgetsService {
   async findOne(userId: string, id: string) {
     const budget = await this.ensureOwnership(userId, id);
 
-    const totalSpent = await this.computeTotalSpent(userId, budget.startDate, budget.endDate);
+    const totalSpent = await this.computeTotalSpent(
+      userId,
+      budget.startDate,
+      budget.endDate,
+    );
     const indicators = FinanceCalculator.buildBudgetIndicators({
       initialAmount: budget.initialAmount,
       savingsTarget: budget.savingsTarget,

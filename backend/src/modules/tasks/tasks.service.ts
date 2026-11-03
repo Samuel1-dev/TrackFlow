@@ -9,22 +9,80 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { UpdateTaskStatusDto } from './dto/update-task-status.dto';
 import { FilterTasksDto } from './dto/filter-tasks.dto';
-import { TaskStatus, TaskPriority, Prisma } from '@prisma/client';
+import { Prisma, TaskStatus, TaskPriority } from '@prisma/client';
 
 // Règles de transition autorisées entre statuts
 const ALLOWED_STATUS_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
   [TaskStatus.TODO]: [TaskStatus.IN_PROGRESS, TaskStatus.BLOCKED],
-  [TaskStatus.IN_PROGRESS]: [TaskStatus.DONE, TaskStatus.BLOCKED, TaskStatus.TODO],
+  [TaskStatus.IN_PROGRESS]: [
+    TaskStatus.DONE,
+    TaskStatus.BLOCKED,
+    TaskStatus.TODO,
+  ],
   [TaskStatus.BLOCKED]: [TaskStatus.TODO, TaskStatus.IN_PROGRESS],
   [TaskStatus.DONE]: [TaskStatus.TODO, TaskStatus.IN_PROGRESS],
 };
 
-const PRIORITY_ORDER: Record<TaskPriority, number> = {
-  [TaskPriority.URGENT]: 4,
-  [TaskPriority.HIGH]: 3,
-  [TaskPriority.NORMAL]: 2,
-  [TaskPriority.LOW]: 1,
-};
+// ─── Types exportés ──────────────────────────────────────────────────────────
+
+export interface TaskTimeLog {
+  id: string;
+  durationMinutes: number;
+  startedAt: Date;
+  notes: string | null;
+}
+
+export interface TaskDependencyRef {
+  dependsOnTask: {
+    id: string;
+    title: string;
+    status: TaskStatus;
+  };
+}
+
+export interface TaskDependentRef {
+  task: {
+    id: string;
+    title: string;
+    status: TaskStatus;
+  };
+}
+
+export interface TaskSubTask {
+  id: string;
+  title: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: Date | null;
+  estimatedMinutes: number;
+}
+
+export interface TaskProject {
+  id: string;
+  title: string;
+  status: string;
+}
+
+export interface TaskWithRelations {
+  id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  startDate: Date | null;
+  dueDate: Date | null;
+  completedAt: Date | null;
+  estimatedMinutes: number;
+  projectId: string | null;
+  parentTaskId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  project: TaskProject | null;
+  subTasks: TaskSubTask[];
+  dependencies: TaskDependencyRef[];
+  dependentOnMe: TaskDependentRef[];
+  timeLogs: TaskTimeLog[];
+}
 
 @Injectable()
 export class TasksService {
@@ -35,19 +93,24 @@ export class TasksService {
   private async ensureOwnership(userId: string, taskId: string) {
     const task = await this.prisma.task.findUnique({ where: { id: taskId } });
     if (!task) throw new NotFoundException('Tâche introuvable');
-    if (task.userId !== userId) throw new ForbiddenException('Accès interdit à cette tâche');
+    if (task.userId !== userId)
+      throw new ForbiddenException('Accès interdit à cette tâche');
     return task;
   }
 
   private async verifyProjectOwnership(userId: string, projectId: string) {
-    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+    });
     if (!project) throw new NotFoundException('Projet introuvable');
     if (project.userId !== userId)
       throw new ForbiddenException('Accès interdit à ce projet');
   }
 
   private async verifyParentOwnership(userId: string, parentTaskId: string) {
-    const parent = await this.prisma.task.findUnique({ where: { id: parentTaskId } });
+    const parent = await this.prisma.task.findUnique({
+      where: { id: parentTaskId },
+    });
     if (!parent) throw new NotFoundException('Tâche parente introuvable');
     if (parent.userId !== userId)
       throw new ForbiddenException('Accès interdit à cette tâche parente');
@@ -57,15 +120,24 @@ export class TasksService {
    * Vérifie que les tâches dont la tâche dépend existent et appartiennent au même utilisateur.
    * Vérifie aussi l'absence de cycles directs (A dépend de B, B dépend de A).
    */
-  private async verifyDependencies(userId: string, taskId: string | null, dependencyIds: string[]) {
+  private async verifyDependencies(
+    userId: string,
+    taskId: string | null,
+    dependencyIds: string[],
+  ) {
     for (const depId of dependencyIds) {
       if (taskId && depId === taskId) {
-        throw new BadRequestException('Une tâche ne peut pas dépendre d\'elle-même');
+        throw new BadRequestException(
+          "Une tâche ne peut pas dépendre d'elle-même",
+        );
       }
       const dep = await this.prisma.task.findUnique({ where: { id: depId } });
-      if (!dep) throw new NotFoundException(`Tâche dépendance introuvable : ${depId}`);
+      if (!dep)
+        throw new NotFoundException(`Tâche dépendance introuvable : ${depId}`);
       if (dep.userId !== userId)
-        throw new ForbiddenException(`Accès interdit à la tâche dépendance : ${depId}`);
+        throw new ForbiddenException(
+          `Accès interdit à la tâche dépendance : ${depId}`,
+        );
 
       // Vérifie cycle direct : si la dep dépend déjà de taskId
       if (taskId) {
@@ -122,22 +194,29 @@ export class TasksService {
         },
       },
       timeLogs: {
-        select: { id: true, durationMinutes: true, startedAt: true, notes: true },
+        select: {
+          id: true,
+          durationMinutes: true,
+          startedAt: true,
+          notes: true,
+        },
         orderBy: { startedAt: 'desc' as const },
       },
     };
   }
 
-  private enrichTask(task: any) {
-    const totalLoggedMinutes = (task.timeLogs || []).reduce(
-      (sum: number, l: any) => sum + l.durationMinutes,
+  private enrichTask(task: TaskWithRelations) {
+    const totalLoggedMinutes = (task.timeLogs ?? []).reduce(
+      (sum: number, l: TaskTimeLog) => sum + l.durationMinutes,
       0,
     );
     const now = new Date();
     const isOverdue =
-      task.dueDate && new Date(task.dueDate) < now && task.status !== TaskStatus.DONE;
-    const blockedByDeps = (task.dependencies || []).some(
-      (d: any) => d.dependsOnTask.status !== TaskStatus.DONE,
+      task.dueDate &&
+      new Date(task.dueDate) < now &&
+      task.status !== TaskStatus.DONE;
+    const blockedByDeps = (task.dependencies ?? []).some(
+      (d: TaskDependencyRef) => d.dependsOnTask.status !== TaskStatus.DONE,
     );
 
     return {
@@ -145,7 +224,7 @@ export class TasksService {
       totalLoggedMinutes,
       isOverdue: !!isOverdue,
       isBlockedByDeps: blockedByDeps,
-      timeVarianceMinutes: totalLoggedMinutes - (task.estimatedMinutes || 0),
+      timeVarianceMinutes: totalLoggedMinutes - (task.estimatedMinutes ?? 0),
     };
   }
 
@@ -153,7 +232,8 @@ export class TasksService {
 
   async create(userId: string, dto: CreateTaskDto) {
     if (dto.projectId) await this.verifyProjectOwnership(userId, dto.projectId);
-    if (dto.parentTaskId) await this.verifyParentOwnership(userId, dto.parentTaskId);
+    if (dto.parentTaskId)
+      await this.verifyParentOwnership(userId, dto.parentTaskId);
     if (dto.dependencyTaskIds?.length) {
       await this.verifyDependencies(userId, null, dto.dependencyTaskIds);
     }
@@ -186,8 +266,22 @@ export class TasksService {
 
   async findAll(userId: string, filters: FilterTasksDto) {
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+    );
+    const todayEnd = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59,
+    );
 
     const where: Prisma.TaskWhereInput = {
       userId,
@@ -239,14 +333,20 @@ export class TasksService {
         project: { select: { id: true, title: true } },
         subTasks: { select: { id: true, title: true, status: true } },
         dependencies: {
-          select: { dependsOnTask: { select: { id: true, title: true, status: true } } },
+          select: {
+            dependsOnTask: { select: { id: true, title: true, status: true } },
+          },
         },
         timeLogs: { select: { durationMinutes: true } },
       },
-      orderBy: [{ dueDate: 'asc' }, { priority: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [
+        { dueDate: 'asc' },
+        { priority: 'desc' },
+        { createdAt: 'desc' },
+      ],
     });
 
-    return tasks.map((t) => this.enrichTask(t));
+    return tasks.map((t) => this.enrichTask(t as unknown as TaskWithRelations));
   }
 
   async findOne(userId: string, id: string) {
@@ -261,13 +361,13 @@ export class TasksService {
   async update(userId: string, id: string, dto: UpdateTaskDto) {
     await this.ensureOwnership(userId, id);
     if (dto.projectId) await this.verifyProjectOwnership(userId, dto.projectId);
-    if (dto.parentTaskId) await this.verifyParentOwnership(userId, dto.parentTaskId);
+    if (dto.parentTaskId)
+      await this.verifyParentOwnership(userId, dto.parentTaskId);
     if (dto.dependencyTaskIds !== undefined) {
       await this.verifyDependencies(userId, id, dto.dependencyTaskIds);
     }
 
-    const completedAt =
-      dto.status === TaskStatus.DONE ? new Date() : undefined;
+    const completedAt = dto.status === TaskStatus.DONE ? new Date() : undefined;
 
     // Si on met à jour les dépendances, on les remplace entièrement
     if (dto.dependencyTaskIds !== undefined) {
@@ -288,8 +388,12 @@ export class TasksService {
       data: {
         ...(dto.title !== undefined && { title: dto.title }),
         ...(dto.description !== undefined && { description: dto.description }),
-        ...(dto.projectId !== undefined && { projectId: dto.projectId || null }),
-        ...(dto.parentTaskId !== undefined && { parentTaskId: dto.parentTaskId || null }),
+        ...(dto.projectId !== undefined && {
+          projectId: dto.projectId || null,
+        }),
+        ...(dto.parentTaskId !== undefined && {
+          parentTaskId: dto.parentTaskId || null,
+        }),
         ...(dto.status !== undefined && { status: dto.status }),
         ...(dto.priority !== undefined && { priority: dto.priority }),
         ...(dto.startDate !== undefined && {
@@ -298,7 +402,9 @@ export class TasksService {
         ...(dto.dueDate !== undefined && {
           dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
         }),
-        ...(dto.estimatedMinutes !== undefined && { estimatedMinutes: dto.estimatedMinutes }),
+        ...(dto.estimatedMinutes !== undefined && {
+          estimatedMinutes: dto.estimatedMinutes,
+        }),
         ...(completedAt && { completedAt }),
       },
       select: this.getFullTaskSelect(),
@@ -319,10 +425,15 @@ export class TasksService {
     }
 
     // Vérifie les dépendances bloquantes si on veut passer à IN_PROGRESS ou DONE
-    if (dto.status === TaskStatus.IN_PROGRESS || dto.status === TaskStatus.DONE) {
+    if (
+      dto.status === TaskStatus.IN_PROGRESS ||
+      dto.status === TaskStatus.DONE
+    ) {
       const blockingDeps = await this.prisma.taskDependency.findMany({
         where: { taskId: id },
-        include: { dependsOnTask: { select: { id: true, title: true, status: true } } },
+        include: {
+          dependsOnTask: { select: { id: true, title: true, status: true } },
+        },
       });
 
       const unfinishedDeps = blockingDeps.filter(
@@ -330,7 +441,9 @@ export class TasksService {
       );
 
       if (unfinishedDeps.length > 0) {
-        const names = unfinishedDeps.map((d) => `"${d.dependsOnTask.title}"`).join(', ');
+        const names = unfinishedDeps
+          .map((d) => `"${d.dependsOnTask.title}"`)
+          .join(', ');
         throw new BadRequestException(
           `Impossible de passer au statut "${dto.status}" : les tâches prérequises suivantes ne sont pas terminées : ${names}`,
         );
@@ -364,10 +477,7 @@ export class TasksService {
     // 1. Supprimer explicitement toutes les dépendances où cette tâche intervient
     await this.prisma.taskDependency.deleteMany({
       where: {
-        OR: [
-          { taskId: id },
-          { dependsOnTaskId: id },
-        ],
+        OR: [{ taskId: id }, { dependsOnTaskId: id }],
       },
     });
 
@@ -412,6 +522,8 @@ export class TasksService {
   // ─── Statistiques & Productivité ────────────────────────────────────────────
 
   async getWeeklyStats(userId: string, timezone: string = 'UTC') {
+    // timezone parameter reserved for future use (localized week boundaries)
+    void timezone;
     const now = new Date();
     // Semaine ISO : lundi à dimanche
     const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay(); // lundi=1 ... dimanche=7
@@ -442,11 +554,17 @@ export class TasksService {
       }),
       this.prisma.timeLog.findMany({
         where: { userId, startedAt: { gte: monday, lte: sunday } },
-        select: { durationMinutes: true, task: { select: { estimatedMinutes: true } } },
+        select: {
+          durationMinutes: true,
+          task: { select: { estimatedMinutes: true } },
+        },
       }),
     ]);
 
-    const totalLoggedMinutes = timeLogs.reduce((sum, l) => sum + l.durationMinutes, 0);
+    const totalLoggedMinutes = timeLogs.reduce(
+      (sum, l) => sum + l.durationMinutes,
+      0,
+    );
     const totalEstimatedMinutes = timeLogs.reduce(
       (sum, l) => sum + (l.task.estimatedMinutes || 0),
       0,
@@ -462,7 +580,8 @@ export class TasksService {
       tasksCreated: created,
       tasksCompleted: completed,
       tasksOverdue: overdue,
-      completionRate: weekTotal > 0 ? Math.round((completed / weekTotal) * 100) : 0,
+      completionRate:
+        weekTotal > 0 ? Math.round((completed / weekTotal) * 100) : 0,
       totalEstimatedMinutes,
       totalLoggedMinutes,
       timeVarianceMinutes: totalLoggedMinutes - totalEstimatedMinutes,

@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -15,16 +19,18 @@ import { OtpType } from '@prisma/client';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-const makeOtp = (overrides: Partial<{
-  id: string;
-  email: string;
-  code: string;
-  type: OtpType;
-  used: boolean;
-  attempts: number;
-  expiresAt: Date;
-  createdAt: Date;
-}> = {}) => ({
+const makeOtp = (
+  overrides: Partial<{
+    id: string;
+    email: string;
+    code: string;
+    type: OtpType;
+    used: boolean;
+    attempts: number;
+    expiresAt: Date;
+    createdAt: Date;
+  }> = {},
+) => ({
   id: 'otp-uuid-1',
   email: 'test@example.com',
   code: '123456',
@@ -179,7 +185,10 @@ describe('AuthService', () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.login({ email: 'unknown@example.com', password: 'password123' }),
+        service.login({
+          email: 'unknown@example.com',
+          password: 'password123',
+        }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -225,7 +234,10 @@ describe('AuthService', () => {
 
       expect(prisma.otpCode.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ type: OtpType.EMAIL_VERIFICATION, used: false }),
+          where: expect.objectContaining({
+            type: OtpType.EMAIL_VERIFICATION,
+            used: false,
+          }),
           data: { used: true },
         }),
       );
@@ -286,9 +298,13 @@ describe('AuthService', () => {
 
     it('[SECURITY] should throw BadRequestException and increment attempts on wrong code', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
-      prisma.otpCode.findFirst.mockResolvedValue(makeOtp({ code: '999999', attempts: 2 }));
+      prisma.otpCode.findFirst.mockResolvedValue(
+        makeOtp({ code: '999999', attempts: 2 }),
+      );
 
-      const err = await service.verifyEmailAndRegister({ ...dto, code: '111111' }).catch((e) => e);
+      const err = await service
+        .verifyEmailAndRegister({ ...dto, code: '111111' })
+        .catch((e) => e);
       expect(err).toBeInstanceOf(BadRequestException);
       expect(err.message).toContain('tentative');
       expect(prisma.otpCode.update).toHaveBeenCalledWith(
@@ -344,7 +360,10 @@ describe('AuthService', () => {
 
       expect(prisma.otpCode.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ type: OtpType.PASSWORD_RESET, used: false }),
+          where: expect.objectContaining({
+            type: OtpType.PASSWORD_RESET,
+            used: false,
+          }),
           data: { used: true },
         }),
       );
@@ -381,10 +400,15 @@ describe('AuthService', () => {
 
     it('[SECURITY] should throw BadRequestException if OTP expired', async () => {
       prisma.otpCode.findFirst.mockResolvedValue(
-        makeOtp({ type: OtpType.PASSWORD_RESET, expiresAt: new Date(Date.now() - 1000) }),
+        makeOtp({
+          type: OtpType.PASSWORD_RESET,
+          expiresAt: new Date(Date.now() - 1000),
+        }),
       );
 
-      await expect(service.verifyResetOtp(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.verifyResetOtp(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('[SECURITY] should increment attempts on wrong code', async () => {
@@ -392,9 +416,9 @@ describe('AuthService', () => {
         makeOtp({ type: OtpType.PASSWORD_RESET, code: '999999', attempts: 1 }),
       );
 
-      await expect(service.verifyResetOtp({ ...dto, code: '000000' })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.verifyResetOtp({ ...dto, code: '000000' }),
+      ).rejects.toThrow(BadRequestException);
       expect(prisma.otpCode.update).toHaveBeenCalledWith(
         expect.objectContaining({ data: { attempts: { increment: 1 } } }),
       );
@@ -429,14 +453,18 @@ describe('AuthService', () => {
     it('should throw NotFoundException if user not found', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.resetPassword(dto)).rejects.toThrow(NotFoundException);
+      await expect(service.resetPassword(dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('[SECURITY] should throw BadRequestException if no active OTP', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
       prisma.otpCode.findFirst.mockResolvedValue(null);
 
-      await expect(service.resetPassword(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.resetPassword(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('[SECURITY] should throw BadRequestException if attempts >= 5 (blocked)', async () => {
@@ -453,10 +481,15 @@ describe('AuthService', () => {
     it('[SECURITY] should throw BadRequestException if OTP expired', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
       prisma.otpCode.findFirst.mockResolvedValue(
-        makeOtp({ type: OtpType.PASSWORD_RESET, expiresAt: new Date(Date.now() - 1000) }),
+        makeOtp({
+          type: OtpType.PASSWORD_RESET,
+          expiresAt: new Date(Date.now() - 1000),
+        }),
       );
 
-      await expect(service.resetPassword(dto)).rejects.toThrow(BadRequestException);
+      await expect(service.resetPassword(dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('[SECURITY] should increment attempts on wrong code', async () => {
@@ -465,9 +498,9 @@ describe('AuthService', () => {
         makeOtp({ type: OtpType.PASSWORD_RESET, code: '999999', attempts: 2 }),
       );
 
-      await expect(service.resetPassword({ ...dto, code: '000000' })).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.resetPassword({ ...dto, code: '000000' }),
+      ).rejects.toThrow(BadRequestException);
       expect(prisma.otpCode.update).toHaveBeenCalledWith(
         expect.objectContaining({ data: { attempts: { increment: 1 } } }),
       );
@@ -498,8 +531,14 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if refresh hash does not match', async () => {
-      jwtService.verifyAsync.mockResolvedValue({ sub: mockUser.id, email: mockUser.email });
-      prisma.user.findUnique.mockResolvedValue({ ...mockUser, refreshHash: 'different-hash' });
+      jwtService.verifyAsync.mockResolvedValue({
+        sub: mockUser.id,
+        email: mockUser.email,
+      });
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        refreshHash: 'different-hash',
+      });
 
       await expect(service.refreshToken('valid-token')).rejects.toThrow(
         UnauthorizedException,
@@ -513,8 +552,14 @@ describe('AuthService', () => {
       const { createHash } = require('crypto') as typeof import('crypto');
       const hash = createHash('sha256').update(fakeToken).digest('hex');
 
-      jwtService.verifyAsync.mockResolvedValue({ sub: mockUser.id, email: mockUser.email });
-      prisma.user.findUnique.mockResolvedValue({ ...mockUser, refreshHash: hash });
+      jwtService.verifyAsync.mockResolvedValue({
+        sub: mockUser.id,
+        email: mockUser.email,
+      });
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        refreshHash: hash,
+      });
 
       const result = await service.refreshToken(fakeToken);
 

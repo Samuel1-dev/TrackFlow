@@ -27,7 +27,9 @@ import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 export class ExpensesController {
   constructor(private readonly expensesService: ExpensesService) {}
 
-  @ApiOperation({ summary: 'Lister les catégories de dépenses (système + personnelles)' })
+  @ApiOperation({
+    summary: 'Lister les catégories de dépenses (système + personnelles)',
+  })
   @Get('categories')
   getCategories(@CurrentUser('userId') userId: string) {
     return this.expensesService.getCategories(userId);
@@ -39,13 +41,18 @@ export class ExpensesController {
     return this.expensesService.create(userId, dto);
   }
 
-  @ApiOperation({ summary: 'Lister les dépenses avec filtres et total calculé' })
+  @ApiOperation({
+    summary: 'Lister les dépenses avec filtres et total calculé',
+  })
   @Get('expenses')
-  findAll(@CurrentUser('userId') userId: string, @Query() filters: FilterExpensesDto) {
+  findAll(
+    @CurrentUser('userId') userId: string,
+    @Query() filters: FilterExpensesDto,
+  ) {
     return this.expensesService.findAll(userId, filters);
   }
 
-  @ApiOperation({ summary: 'Détail d\'une dépense' })
+  @ApiOperation({ summary: "Détail d'une dépense" })
   @Get('expenses/:id')
   findOne(
     @CurrentUser('userId') userId: string,

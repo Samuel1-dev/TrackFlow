@@ -258,7 +258,9 @@ export class AuthService {
     });
 
     if (!otpRecord) {
-      throw new BadRequestException('Aucun code de réinitialisation actif. Veuillez en demander un nouveau.');
+      throw new BadRequestException(
+        'Aucun code de réinitialisation actif. Veuillez en demander un nouveau.',
+      );
     }
 
     if (otpRecord.attempts >= 5) {
@@ -318,7 +320,9 @@ export class AuthService {
     });
 
     if (!otpRecord) {
-      throw new BadRequestException('Aucun code de réinitialisation actif. Veuillez en demander un nouveau.');
+      throw new BadRequestException(
+        'Aucun code de réinitialisation actif. Veuillez en demander un nouveau.',
+      );
     }
 
     if (otpRecord.attempts >= 5) {

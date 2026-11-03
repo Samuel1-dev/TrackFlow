@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectsService } from './projects.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -105,7 +109,9 @@ describe('ProjectsService', () => {
   describe('findOne', () => {
     it('should throw NotFoundException if project not found', async () => {
       prisma.project.findFirst.mockResolvedValue(null);
-      await expect(service.findOne(userId, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(userId, 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should return project with tasks and stats', async () => {
@@ -117,7 +123,10 @@ describe('ProjectsService', () => {
 
   describe('update', () => {
     it('should throw ForbiddenException if user does not own project', async () => {
-      prisma.project.findUnique.mockResolvedValue({ ...mockProject, userId: 'other-user' });
+      prisma.project.findUnique.mockResolvedValue({
+        ...mockProject,
+        userId: 'other-user',
+      });
       await expect(
         service.update(userId, projectId, { title: 'New Title' }),
       ).rejects.toThrow(ForbiddenException);

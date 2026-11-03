@@ -18,7 +18,10 @@ export class FinanceCalculator {
    * Budget disponible pour les dépenses planifiées.
    * = initialAmount − savingsTarget
    */
-  static availableBudgetForExpenses(initialAmount: number, savingsTarget: number): number {
+  static availableBudgetForExpenses(
+    initialAmount: number,
+    savingsTarget: number,
+  ): number {
     return Math.round(initialAmount - savingsTarget);
   }
 
@@ -42,7 +45,10 @@ export class FinanceCalculator {
    * > 0 : l'utilisateur économise plus que prévu.
    * < 0 : l'utilisateur économise moins que prévu (dépassement de l'objectif).
    */
-  static savingsTargetGap(estimatedSavings: number, savingsTarget: number): number {
+  static savingsTargetGap(
+    estimatedSavings: number,
+    savingsTarget: number,
+  ): number {
     return Math.round(estimatedSavings - savingsTarget);
   }
 
@@ -59,13 +65,23 @@ export class FinanceCalculator {
     const savingsTarget = FinanceCalculator.toNumber(params.savingsTarget);
     const { totalSpent, currency } = params;
 
-    const availableBudgetForExpenses = FinanceCalculator.availableBudgetForExpenses(
+    const availableBudgetForExpenses =
+      FinanceCalculator.availableBudgetForExpenses(
+        initialAmount,
+        savingsTarget,
+      );
+    const remainingBudget = FinanceCalculator.remainingBudget(
       initialAmount,
+      totalSpent,
+    );
+    const estimatedSavings = FinanceCalculator.estimatedSavings(
+      initialAmount,
+      totalSpent,
+    );
+    const savingsTargetGap = FinanceCalculator.savingsTargetGap(
+      estimatedSavings,
       savingsTarget,
     );
-    const remainingBudget = FinanceCalculator.remainingBudget(initialAmount, totalSpent);
-    const estimatedSavings = FinanceCalculator.estimatedSavings(initialAmount, totalSpent);
-    const savingsTargetGap = FinanceCalculator.savingsTargetGap(estimatedSavings, savingsTarget);
 
     const savingsProgressPercent =
       savingsTarget > 0
@@ -91,10 +107,17 @@ export class FinanceCalculator {
    * Répartition des dépenses par catégorie avec montant et pourcentage.
    */
   static buildExpensesBreakdown(
-    expenses: { categoryId: string; categoryName: string; amount: Decimal | number }[],
+    expenses: {
+      categoryId: string;
+      categoryName: string;
+      amount: Decimal | number;
+    }[],
     totalSpent: number,
   ) {
-    const grouped: Record<string, { categoryId: string; categoryName: string; total: number }> = {};
+    const grouped: Record<
+      string,
+      { categoryId: string; categoryName: string; total: number }
+    > = {};
 
     for (const e of expenses) {
       if (!grouped[e.categoryId]) {

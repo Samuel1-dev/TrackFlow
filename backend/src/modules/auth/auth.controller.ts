@@ -67,7 +67,10 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Validation du code OTP et création du compte' })
-  @ApiResponse({ status: 201, description: 'Compte créé et connecté avec succès' })
+  @ApiResponse({
+    status: 201,
+    description: 'Compte créé et connecté avec succès',
+  })
   @Post('verify-email')
   async verifyEmail(
     @Body() dto: VerifyEmailRegisterDto,
@@ -102,7 +105,10 @@ export class AuthController {
 
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @ApiOperation({ summary: 'Réinitialisation du mot de passe avec code OTP et ancien mot de passe' })
+  @ApiOperation({
+    summary:
+      'Réinitialisation du mot de passe avec code OTP et ancien mot de passe',
+  })
   @ApiResponse({ status: 200, description: 'Mot de passe réinitialisé' })
   @HttpCode(HttpStatus.OK)
   @Post('reset-password')

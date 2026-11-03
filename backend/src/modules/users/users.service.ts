@@ -73,7 +73,10 @@ export class UsersService {
       throw new NotFoundException('Utilisateur introuvable');
     }
 
-    const isMatch = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    const isMatch = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
     if (!isMatch) {
       throw new BadRequestException('Le mot de passe actuel est incorrect');
     }

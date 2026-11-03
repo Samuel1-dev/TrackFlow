@@ -4,8 +4,14 @@ import { Transform } from 'class-transformer';
 
 export type SearchScopeType = 'all' | 'tasks' | 'projects' | 'expenses';
 
+const parseIntOrDefault = (value: unknown, defaultValue: number): number => {
+  if (value === undefined || value === null) return defaultValue;
+  const n = parseInt(value as string, 10);
+  return isNaN(n) ? defaultValue : n;
+};
+
 export class SearchQueryDto {
-  @ApiProperty({ description: 'Terme de recherche tapé par l\'utilisateur' })
+  @ApiProperty({ description: "Terme de recherche tapé par l'utilisateur" })
   @IsString()
   q: string;
 
@@ -20,14 +26,17 @@ export class SearchQueryDto {
 
   @ApiPropertyOptional({ description: 'Numéro de page (1-indexé)', default: 1 })
   @IsOptional()
-  @Transform(({ value }) => (value !== undefined ? parseInt(value, 10) : 1))
+  @Transform(({ value }: { value: unknown }) => parseIntOrDefault(value, 1))
   @IsInt()
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ description: 'Nombre d\'éléments par page', default: 6 })
+  @ApiPropertyOptional({
+    description: "Nombre d'éléments par page",
+    default: 6,
+  })
   @IsOptional()
-  @Transform(({ value }) => (value !== undefined ? parseInt(value, 10) : 6))
+  @Transform(({ value }: { value: unknown }) => parseIntOrDefault(value, 6))
   @IsInt()
   @Min(1)
   @Max(50)

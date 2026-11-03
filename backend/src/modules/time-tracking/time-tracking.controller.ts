@@ -33,7 +33,9 @@ export class TimeTrackingController {
     return this.timeTrackingService.addTimeLog(userId, taskId, dto);
   }
 
-  @ApiOperation({ summary: 'Lister les sessions de travail d\'une tâche avec total et écart' })
+  @ApiOperation({
+    summary: "Lister les sessions de travail d'une tâche avec total et écart",
+  })
   @Get()
   getTimeLogs(
     @CurrentUser('userId') userId: string,

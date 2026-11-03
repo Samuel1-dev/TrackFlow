@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SearchQueryDto, SearchScopeType } from './dto/search-query.dto';
+import { TaskStatus, TaskPriority, ProjectStatus } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
 export interface SearchResultItem {
   id: string;
@@ -13,7 +15,7 @@ export interface SearchResultItem {
   date?: string | null;
   categoryName?: string | null;
   projectName?: string | null;
-  data: any;
+  data: unknown;
 }
 
 export interface SearchResponse {
@@ -29,6 +31,49 @@ export interface SearchResponse {
     expenses: number;
   };
   results: SearchResultItem[];
+}
+
+// ─── Types internes pour les résultats Prisma ────────────────────────────────
+
+interface TaskResult {
+  id: string;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: Date | null;
+  estimatedMinutes: number;
+  createdAt: Date;
+  updatedAt: Date;
+  project: { id: string; title: string } | null;
+}
+
+interface ProjectResult {
+  id: string;
+  title: string;
+  description: string | null;
+  status: ProjectStatus;
+  startDate: Date;
+  endDate: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface ExpenseCategoryResult {
+  id: string;
+  name: string;
+  color: string | null;
+  icon: string | null;
+}
+
+interface ExpenseResult {
+  id: string;
+  amount: Decimal;
+  date: Date;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  category: ExpenseCategoryResult | null;
 }
 
 @Injectable()
@@ -57,7 +102,7 @@ export class SearchService {
 
     // 1. Fetch matching tasks
     const shouldFetchTasks = scope === 'all' || scope === 'tasks';
-    const tasksPromise = shouldFetchTasks
+    const tasksPromise: Promise<TaskResult[]> = shouldFetchTasks
       ? this.prisma.task.findMany({
           where: {
             userId,
@@ -79,11 +124,11 @@ export class SearchService {
             project: { select: { id: true, title: true } },
           },
         })
-      : Promise.resolve([]);
+      : Promise.resolve([] as TaskResult[]);
 
     // 2. Fetch matching projects
     const shouldFetchProjects = scope === 'all' || scope === 'projects';
-    const projectsPromise = shouldFetchProjects
+    const projectsPromise: Promise<ProjectResult[]> = shouldFetchProjects
       ? this.prisma.project.findMany({
           where: {
             userId,
@@ -103,17 +148,19 @@ export class SearchService {
             updatedAt: true,
           },
         })
-      : Promise.resolve([]);
+      : Promise.resolve([] as ProjectResult[]);
 
     // 3. Fetch matching expenses
     const shouldFetchExpenses = scope === 'all' || scope === 'expenses';
-    const expensesPromise = shouldFetchExpenses
+    const expensesPromise: Promise<ExpenseResult[]> = shouldFetchExpenses
       ? this.prisma.expense.findMany({
           where: {
             userId,
             OR: [
               { description: { contains: rawQuery, mode: 'insensitive' } },
-              { category: { name: { contains: rawQuery, mode: 'insensitive' } } },
+              {
+                category: { name: { contains: rawQuery, mode: 'insensitive' } },
+              },
             ],
           },
           select: {
@@ -123,10 +170,12 @@ export class SearchService {
             description: true,
             createdAt: true,
             updatedAt: true,
-            category: { select: { id: true, name: true, color: true, icon: true } },
+            category: {
+              select: { id: true, name: true, color: true, icon: true },
+            },
           },
         })
-      : Promise.resolve([]);
+      : Promise.resolve([] as ExpenseResult[]);
 
     const [tasks, projects, expenses] = await Promise.all([
       tasksPromise,
@@ -135,7 +184,7 @@ export class SearchService {
     ]);
 
     // Map tasks to SearchResultItem with relevance score
-    const scoredTasks = tasks.map((t) => {
+    const scoredTasks = tasks.map((t: TaskResult) => {
       const titleLower = (t.title || '').toLowerCase();
       let score = 3;
       if (titleLower.startsWith(qLower)) {
@@ -150,10 +199,11 @@ export class SearchService {
         id: t.id,
         type: 'task',
         title: t.title,
-        subtitle: t.description || (t.project ? `Projet: ${t.project.title}` : null),
+        subtitle:
+          t.description || (t.project ? `Projet: ${t.project.title}` : null),
         status: t.status,
         priority: t.priority,
-        projectName: t.project?.title || null,
+        projectName: t.project?.title ?? null,
         data: t,
       };
 
@@ -161,7 +211,7 @@ export class SearchService {
     });
 
     // Map projects to SearchResultItem with relevance score
-    const scoredProjects = projects.map((p) => {
+    const scoredProjects = projects.map((p: ProjectResult) => {
       const titleLower = (p.title || '').toLowerCase();
       let score = 3;
       if (titleLower.startsWith(qLower)) {
@@ -185,10 +235,10 @@ export class SearchService {
     });
 
     // Map expenses to SearchResultItem with relevance score
-    const scoredExpenses = expenses.map((e) => {
-      const desc = e.description || `Dépense ${e.category?.name || ''}`;
+    const scoredExpenses = expenses.map((e: ExpenseResult) => {
+      const desc = e.description || `Dépense ${e.category?.name ?? ''}`;
       const descLower = desc.toLowerCase();
-      const catLower = (e.category?.name || '').toLowerCase();
+      const catLower = (e.category?.name ?? '').toLowerCase();
 
       let score = 3;
       if (descLower.startsWith(qLower) || catLower.startsWith(qLower)) {
@@ -209,7 +259,7 @@ export class SearchService {
         subtitle: e.category?.name ? `Catégorie: ${e.category.name}` : null,
         amount: Number(e.amount),
         date: e.date.toISOString(),
-        categoryName: e.category?.name || null,
+        categoryName: e.category?.name ?? null,
         data: e,
       };
 
@@ -217,20 +267,24 @@ export class SearchService {
     });
 
     // Combine and sort by relevance score asc, then recency desc
-    const combined = [...scoredTasks, ...scoredProjects, ...scoredExpenses].sort(
-      (a, b) => {
-        if (a.score !== b.score) {
-          return a.score - b.score;
-        }
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      },
-    );
+    const combined = [
+      ...scoredTasks,
+      ...scoredProjects,
+      ...scoredExpenses,
+    ].sort((a, b) => {
+      if (a.score !== b.score) {
+        return a.score - b.score;
+      }
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
 
     const total = combined.length;
     const totalPages = Math.ceil(total / limit) || 1;
     const safePage = Math.max(1, Math.min(page, totalPages));
     const offset = (safePage - 1) * limit;
-    const paginatedItems = combined.slice(offset, offset + limit).map((c) => c.item);
+    const paginatedItems = combined
+      .slice(offset, offset + limit)
+      .map((c) => c.item);
 
     return {
       query: rawQuery,

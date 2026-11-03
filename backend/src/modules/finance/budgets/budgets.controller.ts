@@ -14,7 +14,12 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { BudgetsService } from './budgets.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
@@ -37,14 +42,16 @@ export class BudgetsController {
   @ApiOperation({
     summary: 'Récupérer le budget actif avec tous les indicateurs calculés',
     description:
-      'Retourne : budget initial, objectif d\'épargne, budget disponible pour les dépenses, total dépensé, budget restant, épargne estimée, écart à l\'objectif, répartition des dépenses par catégorie.',
+      "Retourne : budget initial, objectif d'épargne, budget disponible pour les dépenses, total dépensé, budget restant, épargne estimée, écart à l'objectif, répartition des dépenses par catégorie.",
   })
   @Get('active')
   getActiveBudget(@CurrentUser('userId') userId: string) {
     return this.budgetsService.getActiveBudget(userId);
   }
 
-  @ApiOperation({ summary: 'Historique paginé des budgets passés avec bilans finaux' })
+  @ApiOperation({
+    summary: 'Historique paginé des budgets passés avec bilans finaux',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @Get('history')
@@ -56,7 +63,9 @@ export class BudgetsController {
     return this.budgetsService.getHistory(userId, page, limit);
   }
 
-  @ApiOperation({ summary: 'Récupérer un budget spécifique avec ses indicateurs' })
+  @ApiOperation({
+    summary: 'Récupérer un budget spécifique avec ses indicateurs',
+  })
   @Get(':id')
   findOne(
     @CurrentUser('userId') userId: string,

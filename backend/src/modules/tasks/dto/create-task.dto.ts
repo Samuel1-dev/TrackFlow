@@ -20,7 +20,7 @@ export class CreateTaskDto {
   @MaxLength(200)
   title: string;
 
-  @ApiPropertyOptional({ example: 'Couvrir tous les écrans de l\'application' })
+  @ApiPropertyOptional({ example: "Couvrir tous les écrans de l'application" })
   @IsOptional()
   @IsString()
   @MaxLength(2000)
@@ -31,7 +31,9 @@ export class CreateTaskDto {
   @IsUUID()
   projectId?: string;
 
-  @ApiPropertyOptional({ description: 'UUID de la tâche parente pour créer une sous-tâche' })
+  @ApiPropertyOptional({
+    description: 'UUID de la tâche parente pour créer une sous-tâche',
+  })
   @IsOptional()
   @IsUUID()
   parentTaskId?: string;
@@ -56,7 +58,10 @@ export class CreateTaskDto {
   @IsDateString()
   dueDate?: string;
 
-  @ApiPropertyOptional({ example: 120, description: 'Durée estimée en minutes' })
+  @ApiPropertyOptional({
+    example: 120,
+    description: 'Durée estimée en minutes',
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -64,7 +69,8 @@ export class CreateTaskDto {
 
   @ApiPropertyOptional({
     type: [String],
-    description: 'Liste des UUIDs des tâches dont cette tâche dépend (prérequis)',
+    description:
+      'Liste des UUIDs des tâches dont cette tâche dépend (prérequis)',
     example: ['uuid-task-1', 'uuid-task-2'],
   })
   @IsOptional()

@@ -34,14 +34,13 @@ export class ProjectsController {
 
   @ApiOperation({ summary: 'Créer un nouveau projet' })
   @Post()
-  create(
-    @CurrentUser('userId') userId: string,
-    @Body() dto: CreateProjectDto,
-  ) {
+  create(@CurrentUser('userId') userId: string, @Body() dto: CreateProjectDto) {
     return this.projectsService.create(userId, dto);
   }
 
-  @ApiOperation({ summary: 'Lister tous les projets de l\'utilisateur connecté' })
+  @ApiOperation({
+    summary: "Lister tous les projets de l'utilisateur connecté",
+  })
   @ApiQuery({ name: 'status', enum: ProjectStatus, required: false })
   @Get()
   findAll(
@@ -51,7 +50,9 @@ export class ProjectsController {
     return this.projectsService.findAll(userId, status);
   }
 
-  @ApiOperation({ summary: 'Récupérer un projet avec ses statistiques et tâches' })
+  @ApiOperation({
+    summary: 'Récupérer un projet avec ses statistiques et tâches',
+  })
   @Get(':id')
   findOne(
     @CurrentUser('userId') userId: string,
@@ -70,7 +71,9 @@ export class ProjectsController {
     return this.projectsService.update(userId, id, dto);
   }
 
-  @ApiOperation({ summary: 'Supprimer un projet (les tâches sont détachées, non supprimées)' })
+  @ApiOperation({
+    summary: 'Supprimer un projet (les tâches sont détachées, non supprimées)',
+  })
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   remove(

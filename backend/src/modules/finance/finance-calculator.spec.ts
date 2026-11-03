@@ -104,7 +104,10 @@ describe('FinanceCalculator', () => {
 
     it('should group expenses by category and compute percentages', () => {
       const totalSpent = 35000;
-      const breakdown = FinanceCalculator.buildExpensesBreakdown(expenses, totalSpent);
+      const breakdown = FinanceCalculator.buildExpensesBreakdown(
+        expenses,
+        totalSpent,
+      );
 
       expect(breakdown).toHaveLength(2);
 
@@ -125,7 +128,9 @@ describe('FinanceCalculator', () => {
 
   describe('availableBudgetForExpenses', () => {
     it('should subtract savings target from initial amount', () => {
-      expect(FinanceCalculator.availableBudgetForExpenses(50000, 10000)).toBe(40000);
+      expect(FinanceCalculator.availableBudgetForExpenses(50000, 10000)).toBe(
+        40000,
+      );
     });
   });
 

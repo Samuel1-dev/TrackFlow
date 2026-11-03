@@ -36,14 +36,20 @@ export class NotificationsService {
     for (const task of overdueTasks) {
       const dueTime = new Date(task.dueDate!).getTime();
       const diffMs = now.getTime() - dueTime;
-      const daysOverdue = Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+      const daysOverdue = Math.max(
+        1,
+        Math.floor(diffMs / (1000 * 60 * 60 * 24)),
+      );
       const isCritical = daysOverdue >= 2 || task.priority === 'URGENT';
 
-      const formattedDueDate = new Date(task.dueDate!).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      });
+      const formattedDueDate = new Date(task.dueDate!).toLocaleDateString(
+        'fr-FR',
+        {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        },
+      );
 
       notifications.push({
         id: `task-overdue-${task.id}`,
@@ -128,7 +134,8 @@ export class NotificationsService {
       const spent = Number(expensesAgg._sum.amount || 0);
       const initial = Number(budget.initialAmount);
 
-      const periodLabel = budget.periodType === 'MONTHLY' ? 'mensuel' : 'hebdomadaire';
+      const periodLabel =
+        budget.periodType === 'MONTHLY' ? 'mensuel' : 'hebdomadaire';
 
       if (spent > initial) {
         const excess = spent - initial;
@@ -186,10 +193,16 @@ export class NotificationsService {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-    const criticalCount = notifications.filter((n) => n.severity === 'CRITICAL').length;
-    const warningCount = notifications.filter((n) => n.severity === 'WARNING').length;
+    const criticalCount = notifications.filter(
+      (n) => n.severity === 'CRITICAL',
+    ).length;
+    const warningCount = notifications.filter(
+      (n) => n.severity === 'WARNING',
+    ).length;
     const infoCount = notifications.filter((n) => n.severity === 'INFO').length;
-    const overdueCount = notifications.filter((n) => n.type === 'TASK_OVERDUE').length;
+    const overdueCount = notifications.filter(
+      (n) => n.type === 'TASK_OVERDUE',
+    ).length;
     const budgetAlertsCount = notifications.filter(
       (n) => n.type === 'BUDGET_EXCEEDED' || n.type === 'BUDGET_WARNING',
     ).length;

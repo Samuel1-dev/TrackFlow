@@ -12,7 +12,8 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @ApiOperation({
-    summary: 'Récupérer les notifications système (tâches en retard, dépassement de budget, blocages)',
+    summary:
+      'Récupérer les notifications système (tâches en retard, dépassement de budget, blocages)',
   })
   @Get()
   getNotifications(@CurrentUser('userId') userId: string) {

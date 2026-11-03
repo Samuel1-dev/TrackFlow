@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { TasksService } from './tasks.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -61,7 +65,9 @@ describe('TasksService', () => {
       timeLog: {
         findMany: jest.fn().mockResolvedValue([]),
         deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
-        aggregate: jest.fn().mockResolvedValue({ _sum: { durationMinutes: 0 } }),
+        aggregate: jest
+          .fn()
+          .mockResolvedValue({ _sum: { durationMinutes: 0 } }),
       },
     };
 
@@ -93,7 +99,10 @@ describe('TasksService', () => {
 
     it('should reject dependency on task belonging to another user', async () => {
       // Mock a dependency task belonging to a different user
-      prisma.task.findUnique.mockResolvedValueOnce({ ...baseTask, userId: 'other-user' });
+      prisma.task.findUnique.mockResolvedValueOnce({
+        ...baseTask,
+        userId: 'other-user',
+      });
       await expect(
         service.create(userId, {
           title: 'A',
@@ -106,7 +115,9 @@ describe('TasksService', () => {
   describe('findOne', () => {
     it('should throw NotFoundException if task not found', async () => {
       prisma.task.findFirst.mockResolvedValue(null);
-      await expect(service.findOne(userId, 'nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne(userId, 'nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should return enriched task', async () => {
@@ -149,7 +160,9 @@ describe('TasksService', () => {
       ]);
 
       await expect(
-        service.updateStatus(userId, taskId, { status: TaskStatus.IN_PROGRESS }),
+        service.updateStatus(userId, taskId, {
+          status: TaskStatus.IN_PROGRESS,
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -177,12 +190,19 @@ describe('TasksService', () => {
 
   describe('remove', () => {
     it('should throw ForbiddenException if user does not own the task', async () => {
-      prisma.task.findUnique.mockResolvedValue({ ...baseTask, userId: 'other' });
-      await expect(service.remove(userId, taskId)).rejects.toThrow(ForbiddenException);
+      prisma.task.findUnique.mockResolvedValue({
+        ...baseTask,
+        userId: 'other',
+      });
+      await expect(service.remove(userId, taskId)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should delete task and report released dependencies', async () => {
-      prisma.taskDependency.findMany.mockResolvedValue([{ task: { id: 'dep-task-1', title: 'Dependent' } }]);
+      prisma.taskDependency.findMany.mockResolvedValue([
+        { task: { id: 'dep-task-1', title: 'Dependent' } },
+      ]);
       const result = await service.remove(userId, taskId);
       expect(result.message).toContain('supprimée');
       expect(result.dependenciesReleased).toBe(1);

@@ -17,19 +17,28 @@ export class CreateExpenseDto {
   @IsUUID()
   categoryId: string;
 
-  @ApiProperty({ example: 5000, description: 'Montant positif de la dépense (ex : 5000 FCFA)' })
+  @ApiProperty({
+    example: 5000,
+    description: 'Montant positif de la dépense (ex : 5000 FCFA)',
+  })
   @IsNotEmpty()
   @IsNumber()
   @IsPositive({ message: 'Le montant doit être positif' })
   @Type(() => Number)
   amount: number;
 
-  @ApiProperty({ example: '2026-10-15T12:00:00.000Z', description: 'Date de la dépense' })
+  @ApiProperty({
+    example: '2026-10-15T12:00:00.000Z',
+    description: 'Date de la dépense',
+  })
   @IsNotEmpty()
   @IsDateString()
   date: string;
 
-  @ApiPropertyOptional({ example: 'Courses au marché', description: 'Description optionnelle' })
+  @ApiPropertyOptional({
+    example: 'Courses au marché',
+    description: 'Description optionnelle',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(300)

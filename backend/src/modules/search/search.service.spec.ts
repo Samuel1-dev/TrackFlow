@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { SearchService } from './search.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -55,7 +59,12 @@ describe('SearchService', () => {
             date: new Date('2026-10-03'),
             createdAt: new Date('2026-10-03'),
             updatedAt: new Date('2026-10-03'),
-            category: { id: 'cat-1', name: 'Software', color: '#6366f1', icon: 'tag' },
+            category: {
+              id: 'cat-1',
+              name: 'Software',
+              color: '#6366f1',
+              icon: 'tag',
+            },
           },
         ]),
       },

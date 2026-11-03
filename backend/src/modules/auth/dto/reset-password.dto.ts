@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, Length, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Length,
+  MinLength,
+} from 'class-validator';
 
 export class ResetPasswordDto {
   @ApiProperty({ example: 'user@example.com' })
@@ -16,12 +22,16 @@ export class ResetPasswordDto {
   @ApiProperty({ example: 'NewSecret123', minLength: 6 })
   @IsNotEmpty({ message: 'Le nouveau mot de passe est requis' })
   @IsString()
-  @MinLength(6, { message: 'Le nouveau mot de passe doit comporter au moins 6 caractères' })
+  @MinLength(6, {
+    message: 'Le nouveau mot de passe doit comporter au moins 6 caractères',
+  })
   newPassword!: string;
 
   @ApiProperty({ example: 'NewSecret123', minLength: 6 })
   @IsNotEmpty({ message: 'La confirmation du mot de passe est requise' })
   @IsString()
-  @MinLength(6, { message: 'La confirmation doit comporter au moins 6 caractères' })
+  @MinLength(6, {
+    message: 'La confirmation doit comporter au moins 6 caractères',
+  })
   confirmPassword!: string;
 }

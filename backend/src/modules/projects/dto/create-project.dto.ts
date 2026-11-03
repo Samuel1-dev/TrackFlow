@@ -16,7 +16,9 @@ export class CreateProjectDto {
   @MaxLength(100)
   title: string;
 
-  @ApiPropertyOptional({ example: 'Refonte complète du site vitrine en Angular' })
+  @ApiPropertyOptional({
+    example: 'Refonte complète du site vitrine en Angular',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)

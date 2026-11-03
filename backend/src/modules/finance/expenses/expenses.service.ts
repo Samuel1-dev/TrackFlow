@@ -15,9 +15,12 @@ export class ExpensesService {
   constructor(private prisma: PrismaService) {}
 
   private async ensureOwnership(userId: string, expenseId: string) {
-    const expense = await this.prisma.expense.findUnique({ where: { id: expenseId } });
+    const expense = await this.prisma.expense.findUnique({
+      where: { id: expenseId },
+    });
     if (!expense) throw new NotFoundException('Dépense introuvable');
-    if (expense.userId !== userId) throw new ForbiddenException('Accès interdit à cette dépense');
+    if (expense.userId !== userId)
+      throw new ForbiddenException('Accès interdit à cette dépense');
     return expense;
   }
 
@@ -28,7 +31,8 @@ export class ExpensesService {
         OR: [{ userId }, { userId: null }], // catégories système (userId=null) ou de l'utilisateur
       },
     });
-    if (!category) throw new NotFoundException('Catégorie introuvable ou non accessible');
+    if (!category)
+      throw new NotFoundException('Catégorie introuvable ou non accessible');
     return category;
   }
 
@@ -43,7 +47,9 @@ export class ExpensesService {
         date: new Date(dto.date),
         description: dto.description,
       },
-      include: { category: { select: { id: true, name: true, icon: true, color: true } } },
+      include: {
+        category: { select: { id: true, name: true, icon: true, color: true } },
+      },
     });
 
     return {
@@ -58,9 +64,10 @@ export class ExpensesService {
       ...(filters.categoryId && { categoryId: filters.categoryId }),
       ...(filters.from && { date: { gte: new Date(filters.from) } }),
       ...(filters.to && { date: { lte: new Date(filters.to) } }),
-      ...(filters.from && filters.to && {
-        date: { gte: new Date(filters.from), lte: new Date(filters.to) },
-      }),
+      ...(filters.from &&
+        filters.to && {
+          date: { gte: new Date(filters.from), lte: new Date(filters.to) },
+        }),
       ...(filters.search && {
         description: { contains: filters.search, mode: 'insensitive' },
       }),
@@ -69,7 +76,11 @@ export class ExpensesService {
     const [expenses, aggregate] = await Promise.all([
       this.prisma.expense.findMany({
         where,
-        include: { category: { select: { id: true, name: true, icon: true, color: true } } },
+        include: {
+          category: {
+            select: { id: true, name: true, icon: true, color: true },
+          },
+        },
         orderBy: { date: 'desc' },
       }),
       this.prisma.expense.aggregate({ where, _sum: { amount: true } }),
@@ -80,7 +91,9 @@ export class ExpensesService {
         ...e,
         amount: FinanceCalculator.toNumber(e.amount),
       })),
-      totalSpent: Math.round(FinanceCalculator.toNumber(aggregate._sum.amount ?? 0)),
+      totalSpent: Math.round(
+        FinanceCalculator.toNumber(aggregate._sum.amount ?? 0),
+      ),
       count: expenses.length,
     };
   }
@@ -89,7 +102,9 @@ export class ExpensesService {
     await this.ensureOwnership(userId, id);
     const expense = await this.prisma.expense.findUnique({
       where: { id },
-      include: { category: { select: { id: true, name: true, icon: true, color: true } } },
+      include: {
+        category: { select: { id: true, name: true, icon: true, color: true } },
+      },
     });
     return {
       ...expense,
@@ -99,7 +114,8 @@ export class ExpensesService {
 
   async update(userId: string, id: string, dto: UpdateExpenseDto) {
     await this.ensureOwnership(userId, id);
-    if (dto.categoryId) await this.verifyCategoryOwnership(userId, dto.categoryId);
+    if (dto.categoryId)
+      await this.verifyCategoryOwnership(userId, dto.categoryId);
 
     const expense = await this.prisma.expense.update({
       where: { id },
@@ -109,7 +125,9 @@ export class ExpensesService {
         ...(dto.date && { date: new Date(dto.date) }),
         ...(dto.description !== undefined && { description: dto.description }),
       },
-      include: { category: { select: { id: true, name: true, icon: true, color: true } } },
+      include: {
+        category: { select: { id: true, name: true, icon: true, color: true } },
+      },
     });
 
     return {

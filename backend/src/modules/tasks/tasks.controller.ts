@@ -13,11 +13,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -35,10 +31,7 @@ export class TasksController {
 
   @ApiOperation({ summary: 'Créer une nouvelle tâche (ou sous-tâche)' })
   @Post()
-  create(
-    @CurrentUser('userId') userId: string,
-    @Body() dto: CreateTaskDto,
-  ) {
+  create(@CurrentUser('userId') userId: string, @Body() dto: CreateTaskDto) {
     return this.tasksService.create(userId, dto);
   }
 
@@ -51,13 +44,15 @@ export class TasksController {
     return this.tasksService.findAll(userId, filters);
   }
 
-  @ApiOperation({ summary: 'Récupérer les statistiques de productivité hebdomadaire' })
+  @ApiOperation({
+    summary: 'Récupérer les statistiques de productivité hebdomadaire',
+  })
   @Get('weekly-stats')
   getWeeklyStats(@CurrentUser('userId') userId: string) {
     return this.tasksService.getWeeklyStats(userId);
   }
 
-  @ApiOperation({ summary: 'Récupérer le détail complet d\'une tâche' })
+  @ApiOperation({ summary: "Récupérer le détail complet d'une tâche" })
   @Get(':id')
   findOne(
     @CurrentUser('userId') userId: string,
@@ -77,7 +72,7 @@ export class TasksController {
   }
 
   @ApiOperation({
-    summary: 'Changer le statut d\'une tâche',
+    summary: "Changer le statut d'une tâche",
     description:
       'Vérifie les transitions autorisées et bloque si des dépendances prérequises ne sont pas terminées',
   })

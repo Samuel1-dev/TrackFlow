@@ -20,13 +20,13 @@ export class TransformInterceptor<T> implements NestInterceptor<
 > {
   intercept(
     context: ExecutionContext,
-    next: CallHandler,
+    next: CallHandler<T>,
   ): Observable<Response<T>> {
     return next.handle().pipe(
-      map((data) => {
+      map((data: T): Response<T> => {
         // If data is already in standard format, return as is
-        if (data && typeof data === 'object' && 'success' in data) {
-          return data;
+        if (data && typeof data === 'object' && 'success' in (data as object)) {
+          return data as unknown as Response<T>;
         }
         return {
           success: true,
