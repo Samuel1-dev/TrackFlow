@@ -43,7 +43,7 @@ async function bootstrap() {
 
   // Swagger OpenAPI documentation
   const config = new DocumentBuilder()
-    .setTitle('TaskFlow API')
+    .setTitle('Finovia API')
     .setDescription(
       'API REST de gestion des tâches, projets et suivi financier personnel',
     )
@@ -66,7 +66,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  logger.log(`TaskFlow API is running on: http://localhost:${port}/api/v1`);
+  logger.log(`Finovia API is running on: http://localhost:${port}/api/v1`);
   logger.log(
     `Swagger documentation available on: http://localhost:${port}/api/docs`,
   );

@@ -218,25 +218,13 @@
 
   <!-- Mode 2: No Task Selected -> Show Financial Overview (Finora Visa Card + Goals) -->
   @else {
-    <div class="py-3 px-4 sm:px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Aperçu Financier</span>
-        <span class="text-[11px] font-semibold text-brand-600 dark:text-brand-400">Mode Veille</span>
-      </div>
-      <button
-        (click)="collapsePanel()"
-        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-        title="Plier le panneau"
-      >
-        <app-icon name="panel-right" [size]="17"></app-icon>
-      </button>
-    </div>
+   
 
     <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
       <!-- Finora Style Gradient Visa Card -->
       <div class="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-tr from-slate-900 via-indigo-950 to-brand-900 text-white shadow-xl shadow-indigo-950/20">
         <div class="flex justify-between items-start mb-6">
-          <span class="text-xs font-semibold tracking-wider text-slate-300 uppercase">TaskFlow Card</span>
+          <span class="text-xs font-semibold tracking-wider text-slate-300 uppercase">Finovia Card</span>
           <span class="font-extrabold text-sm tracking-widest text-white/90">XOF</span>
         </div>
 
@@ -292,5 +280,16 @@
         </p>
       </div>
     </div>
+
+     <div class="py-3 px-4 sm:px-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+      <button
+        (click)="collapsePanel()"
+        class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        title="Plier le panneau"
+      >
+        <app-icon name="panel-right" [size]="17"></app-icon>
+      </button>
+    </div>
+
   }
 </aside>
