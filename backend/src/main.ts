@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -8,8 +9,12 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const logger = new Logger('Bootstrap');
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  // Derrière le reverse proxy d'alwaysdata
+  app.set('trust proxy', 1);
 
   // Security headers & cookies
   app.use(helmet());
@@ -35,41 +40,46 @@ async function bootstrap() {
     }),
   );
 
-  app.use(cookieParser());
-
   // Global exception filter and response interceptor
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
 
-  // Swagger OpenAPI documentation
-  const config = new DocumentBuilder()
-    .setTitle('Finovia API')
-    .setDescription(
-      'API REST de gestion des tâches, projets et suivi financier personnel',
-    )
-    .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'Authorization',
-        description: 'Entrer le jeton JWT',
-        in: 'header',
-      },
-      'bearer',
-    )
-    .build();
+  // Swagger OpenAPI documentation (désactivé en production)
+  if (!isProduction) {
+    const config = new DocumentBuilder()
+      .setTitle('Finovia API')
+      .setDescription(
+        'API REST de gestion des tâches, projets et suivi financier personnel',
+      )
+      .setVersion('1.0')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'Authorization',
+          description: 'Entrer le jeton JWT',
+          in: 'header',
+        },
+        'bearer',
+      )
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-  logger.log(`Finovia API is running on: http://localhost:${port}/api/v1`);
-  logger.log(
-    `Swagger documentation available on: http://localhost:${port}/api/docs`,
-  );
+  // Alwaysdata fournit PORT et IP ; valeurs par défaut pour le développement local
+  const port = Number(process.env.PORT) || 3000;
+  const host = process.env.IP || '127.0.0.1';
+  await app.listen(port, host);
+
+  logger.log(`Finovia API is running on: http://${host}:${port}/api/v1`);
+  if (!isProduction) {
+    logger.log(
+      `Swagger documentation available on: http://${host}:${port}/api/docs`,
+    );
+  }
 }
 
 void bootstrap();

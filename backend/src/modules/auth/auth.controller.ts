@@ -23,6 +23,7 @@ import { Public } from '../../common/decorators/public.decorator';
 
 const REFRESH_COOKIE = 'refreshToken';
 const REFRESH_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 jours
+const isProduction = process.env.NODE_ENV === 'production';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -30,14 +31,17 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // Lu à chaque appel (et non au chargement du module), pour que NODE_ENV soit bien défini
+  
   private cookieOptions(): CookieOptions {
     return {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite:  isProduction ? 'none' : 'lax',
       path: '/api/v1/auth',
     };
   }
+
+
 
   private setRefreshCookie(response: Response, token: string) {
     response.cookie(REFRESH_COOKIE, token, {
