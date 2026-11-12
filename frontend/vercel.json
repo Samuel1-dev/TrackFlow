@@ -1,4 +1,5 @@
 {
+  "outputDirectory": "dist/frontend/browser",
   "rewrites": [
     { "source": "/api/:path*", "destination": "https://finovia.alwaysdata.net/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
