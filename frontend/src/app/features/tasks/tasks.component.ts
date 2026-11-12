@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { TasksService } from '../../core/services/tasks.service';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
 import { Task, TaskStatus } from '../../core/models/task.models';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-tasks',
@@ -19,6 +20,7 @@ export class TasksComponent implements OnInit, OnDestroy {
     private tasksService: TasksService,
     public taskSelectionService: TaskSelectionService,
     private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
   ) {}
 
   ngOnInit() {
@@ -114,7 +116,7 @@ export class TasksComponent implements OnInit, OnDestroy {
 
   toggleTaskDone(task: Task) {
     const nextStatus = task.status === 'DONE' ? 'TODO' : 'DONE';
-    this.tasksService.updateStatus(task.id, nextStatus as any).subscribe({
+    this.tasksService.updateStatus(task.id, nextStatus as TaskStatus).subscribe({
       next: (updated) => {
         this.taskSelectionService.notifyTaskUpdated(updated);
         const idx = this.tasks.findIndex((t) => t.id === updated.id);
@@ -123,7 +125,7 @@ export class TasksComponent implements OnInit, OnDestroy {
         }
         this.cdr.detectChanges();
       },
-      error: (err) => alert(err.error?.message || 'Erreur lors du changement de statut'),
+      error: (err) => this.confirmDialog.alert(err.error?.message || 'Erreur lors du changement de statut'),
     });
   }
 
@@ -131,7 +133,13 @@ export class TasksComponent implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
     }
-    if (confirm(`Voulez-vous vraiment supprimer la tâche "${task.title}" ?`)) {
+    this.confirmDialog.open({
+      title: 'Supprimer la tâche',
+      message: `Voulez-vous vraiment supprimer la tâche "${task.title}" ?`,
+      confirmLabel: 'Supprimer',
+      danger: true,
+    }).subscribe((confirmed) => {
+      if (!confirmed) return;
       this.tasksService.remove(task.id).subscribe({
         next: () => {
           this.tasks = this.tasks.filter((t) => t.id !== task.id);
@@ -139,9 +147,9 @@ export class TasksComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
+          this.confirmDialog.alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
         },
       });
-    }
+    });
   }
 }

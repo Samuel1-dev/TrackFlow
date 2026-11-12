@@ -6,6 +6,7 @@ import { ProjectsService } from '../../core/services/projects.service';
 import { FinanceService } from '../../core/services/finance.service';
 import { Project } from '../../core/models/project.models';
 import { ExpenseCategory } from '../../core/models/finance.models';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -53,6 +54,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     private financeService: FinanceService,
     private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
   ) {
     this.initDefaultBudgetDates();
 
@@ -142,7 +144,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
           this.newTask.description = '';
           this.cdr.detectChanges();
         },
-        error: (err) => alert(err.error?.message || 'Erreur lors de la création'),
+        error: (err) => this.confirmDialog.alert(err.error?.message || 'Erreur lors de la création'),
       });
   }
 
@@ -162,7 +164,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
           this.newExpense.description = '';
           this.cdr.detectChanges();
         },
-        error: (err) => alert(err.error?.message || 'Erreur lors de la dépense'),
+        error: (err) => this.confirmDialog.alert(err.error?.message || 'Erreur lors de la dépense'),
       });
   }
 

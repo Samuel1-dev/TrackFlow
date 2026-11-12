@@ -7,6 +7,7 @@ import { TasksService } from '../../core/services/tasks.service';
 import { FinanceService } from '../../core/services/finance.service';
 import { DashboardSummary, Expense } from '../../core/models/finance.models';
 import { Task } from '../../core/models/task.models';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 
 export interface WeeklyExpensePoint {
   weekIndex: number;
@@ -44,6 +45,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private tasksService: TasksService,
     private financeService: FinanceService,
     private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
   ) {}
 
   ngOnInit() {
@@ -280,7 +282,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.loadData();
         this.cdr.detectChanges();
       },
-      error: (err) => alert(err.error?.message || 'Erreur lors de la mise à jour'),
+      error: (err) => this.confirmDialog.alert(err.error?.message || 'Erreur lors de la mise à jour'),
     });
   }
 
@@ -288,7 +290,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
     }
-    if (confirm(`Voulez-vous vraiment supprimer la tâche "${task.title}" ?`)) {
+    this.confirmDialog.open({
+      title: 'Supprimer la tâche',
+      message: `Voulez-vous vraiment supprimer la tâche "${task.title}" ?`,
+      confirmLabel: 'Supprimer',
+      danger: true,
+    }).subscribe((confirmed) => {
+      if (!confirmed) return;
       this.tasksService.remove(task.id).subscribe({
         next: () => {
           this.allTasks = this.allTasks.filter((t) => t.id !== task.id);
@@ -297,9 +305,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
+          this.confirmDialog.alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
         },
       });
-    }
+    });
   }
 }

@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { FinanceService } from '../../../core/services/finance.service';
 import { TaskSelectionService } from '../../../core/services/task-selection.service';
 import { Expense, ExpenseCategory } from '../../../core/models/finance.models';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-expenses',
@@ -21,6 +22,7 @@ export class ExpensesComponent implements OnInit, OnDestroy {
     private financeService: FinanceService,
     public taskSelectionService: TaskSelectionService,
     private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
   ) {}
 
   ngOnInit() {
@@ -70,7 +72,13 @@ export class ExpensesComponent implements OnInit, OnDestroy {
   }
 
   deleteExpense(id: string) {
-    if (confirm('Supprimer cette dépense ?')) {
+    this.confirmDialog.open({
+      title: 'Supprimer la dépense',
+      message: 'Voulez-vous vraiment supprimer cette dépense ?',
+      confirmLabel: 'Supprimer',
+      danger: true,
+    }).subscribe((confirmed) => {
+      if (!confirmed) return;
       const target = this.expenses.find((e) => e.id === id);
       this.financeService.deleteExpense(id).subscribe({
         next: () => {
@@ -82,6 +90,6 @@ export class ExpensesComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
       });
-    }
+    });
   }
 }

@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { FinanceService } from '../../../core/services/finance.service';
 import { TaskSelectionService } from '../../../core/services/task-selection.service';
 import { ActiveBudget } from '../../../core/models/finance.models';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-budgets',
@@ -27,6 +28,7 @@ export class BudgetsComponent implements OnInit, OnDestroy {
     private financeService: FinanceService,
     public taskSelectionService: TaskSelectionService,
     private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
   ) {}
 
   ngOnInit() {
@@ -104,7 +106,7 @@ export class BudgetsComponent implements OnInit, OnDestroy {
   submitUpdateBudget() {
     if (!this.activeBudget) return;
     if (this.editForm.savingsTarget > this.editForm.initialAmount) {
-      this.editErrorMessage = 'L\'objectif d\'épargne ne peut pas dépasser le montant initial.';
+      this.editErrorMessage = "L'objectif d'épargne ne peut pas dépasser le montant initial.";
       this.cdr.detectChanges();
       return;
     }
@@ -135,20 +137,23 @@ export class BudgetsComponent implements OnInit, OnDestroy {
 
   deleteActiveBudget() {
     if (!this.activeBudget) return;
-    const confirmed = confirm(
-      'Voulez-vous vraiment supprimer ce budget actif ? Vous pourrez en créer un nouveau immédiatement.',
-    );
-    if (!confirmed) return;
-
-    const id = this.activeBudget.id;
-    this.financeService.deleteBudget(id).subscribe({
-      next: () => {
-        this.activeBudget = null;
-        this.taskSelectionService.notifyBudgetDeleted(id);
-        this.loadData();
-        this.cdr.detectChanges();
-      },
-      error: (err) => alert(err.error?.message || 'Erreur lors de la suppression'),
+    this.confirmDialog.open({
+      title: 'Supprimer le budget',
+      message: 'Voulez-vous vraiment supprimer ce budget actif ? Vous pourrez en créer un nouveau immédiatement.',
+      confirmLabel: 'Supprimer',
+      danger: true,
+    }).subscribe((confirmed) => {
+      if (!confirmed) return;
+      const id = this.activeBudget!.id;
+      this.financeService.deleteBudget(id).subscribe({
+        next: () => {
+          this.activeBudget = null;
+          this.taskSelectionService.notifyBudgetDeleted(id);
+          this.loadData();
+          this.cdr.detectChanges();
+        },
+        error: (err) => this.confirmDialog.alert(err.error?.message || 'Erreur lors de la suppression'),
+      });
     });
   }
 }

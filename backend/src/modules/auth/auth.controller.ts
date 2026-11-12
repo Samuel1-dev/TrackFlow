@@ -31,17 +31,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // Lu à chaque appel (et non au chargement du module), pour que NODE_ENV soit bien défini
-  
+
   private cookieOptions(): CookieOptions {
     return {
       httpOnly: true,
       secure: isProduction,
-      sameSite:  isProduction ? 'none' : 'lax',
+      sameSite: isProduction ? 'none' : 'lax',
       path: '/api/v1/auth',
     };
   }
-
-
 
   private setRefreshCookie(response: Response, token: string) {
     response.cookie(REFRESH_COOKIE, token, {

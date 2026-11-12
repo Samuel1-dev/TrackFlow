@@ -5,6 +5,7 @@ import { TasksService } from '../../core/services/tasks.service';
 import { FinanceService } from '../../core/services/finance.service';
 import { Task, TaskStatus } from '../../core/models/task.models';
 import { ActiveBudget } from '../../core/models/finance.models';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-task-detail-panel',
@@ -22,6 +23,7 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
     private tasksService: TasksService,
     private financeService: FinanceService,
     private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
   ) {}
 
   ngOnInit() {
@@ -81,7 +83,7 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        alert(err.error?.message || 'Erreur lors du changement de statut');
+        this.confirmDialog.alert(err.error?.message || 'Erreur lors du changement de statut');
       },
     });
   }
@@ -114,13 +116,19 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
         });
       },
       error: (err) => {
-        alert(err.error?.message || "Erreur lors de l'enregistrement du temps");
+        this.confirmDialog.alert(err.error?.message || "Erreur lors de l'enregistrement du temps");
       },
     });
   }
 
   deleteTask(taskId: string) {
-    if (confirm('Voulez-vous vraiment supprimer cette tâche ?')) {
+    this.confirmDialog.open({
+      title: 'Supprimer la tâche',
+      message: 'Voulez-vous vraiment supprimer cette tâche ?',
+      confirmLabel: 'Supprimer',
+      danger: true,
+    }).subscribe((confirmed) => {
+      if (!confirmed) return;
       this.tasksService.remove(taskId).subscribe({
         next: () => {
           this.taskSelectionService.notifyTaskDeleted(taskId);
@@ -128,14 +136,20 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
+          this.confirmDialog.alert(err.error?.message || 'Erreur lors de la suppression de la tâche');
         },
       });
-    }
+    });
   }
 
   deleteSubtask(subId: string) {
-    if (confirm('Voulez-vous vraiment supprimer cette sous-tâche ?')) {
+    this.confirmDialog.open({
+      title: 'Supprimer la sous-tâche',
+      message: 'Voulez-vous vraiment supprimer cette sous-tâche ?',
+      confirmLabel: 'Supprimer',
+      danger: true,
+    }).subscribe((confirmed) => {
+      if (!confirmed) return;
       this.tasksService.remove(subId).subscribe({
         next: () => {
           const current = this.task();
@@ -148,10 +162,10 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          alert(err.error?.message || 'Erreur lors de la suppression de la sous-tâche');
+          this.confirmDialog.alert(err.error?.message || 'Erreur lors de la suppression de la sous-tâche');
         },
       });
-    }
+    });
   }
 
   getSubtasksDoneCount(task: Task): number {

@@ -1,0 +1,65 @@
+<div
+  *ngIf="dialogService.options()"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4"
+  (click)="onBackdropClick($event)"
+>
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"></div>
+
+  <!-- Modal -->
+  <div
+    class="relative bg-white dark:bg-surface-cardDark rounded-3xl shadow-2xl border border-slate-100 dark:border-surface-borderDark w-full max-w-sm p-6 animate-scale-in overflow-hidden"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Icon -->
+    <div
+      class="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 mx-auto transition-transform"
+      [class.bg-red-50]="dialogService.options()?.danger"
+      [class.dark:bg-red-950/40]="dialogService.options()?.danger"
+      [class.text-red-500]="dialogService.options()?.danger"
+      [class.bg-brand-50]="!dialogService.options()?.danger"
+      [class.dark:bg-brand-950/40]="!dialogService.options()?.danger"
+      [class.text-brand-600]="!dialogService.options()?.danger"
+    >
+      <app-icon
+        [name]="dialogService.options()?.danger ? (dialogService.options()?.isAlert ? 'alert' : 'trash') : 'alert'"
+        [size]="26"
+      ></app-icon>
+    </div>
+
+    <!-- Title -->
+    <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white text-center mb-2 tracking-tight">
+      {{ dialogService.options()?.title }}
+    </h3>
+
+    <!-- Message -->
+    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 text-center leading-relaxed mb-6 font-medium">
+      {{ dialogService.options()?.message }}
+    </p>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-3">
+      <button
+        *ngIf="!dialogService.options()?.isAlert && dialogService.options()?.cancelLabel !== ''"
+        type="button"
+        (click)="dialogService.cancel()"
+        class="flex-1 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs sm:text-sm transition-all"
+      >
+        {{ dialogService.options()?.cancelLabel || 'Annuler' }}
+      </button>
+      <button
+        type="button"
+        (click)="dialogService.confirm()"
+        class="flex-1 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white shadow-md transition-all active:scale-[0.98]"
+        [class.bg-red-500]="dialogService.options()?.danger"
+        [class.hover:bg-red-600]="dialogService.options()?.danger"
+        [class.shadow-red-500/25]="dialogService.options()?.danger"
+        [class.bg-brand-600]="!dialogService.options()?.danger"
+        [class.hover:bg-brand-700]="!dialogService.options()?.danger"
+        [class.shadow-brand-500/25]="!dialogService.options()?.danger"
+      >
+        {{ dialogService.options()?.confirmLabel || 'Confirmer' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { ProjectsService } from '../../core/services/projects.service';
 import { TaskSelectionService } from '../../core/services/task-selection.service';
 import { Project } from '../../core/models/project.models';
+import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-projects',
@@ -25,6 +26,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     private taskSelectionService: TaskSelectionService,
     private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
   ) {}
 
   ngOnInit() {
@@ -78,25 +80,28 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           this.taskSelectionService.notifyProjectCreated(created);
           this.cdr.detectChanges();
         },
-        error: (err) => alert(err.error?.message || 'Erreur lors de la création'),
+        error: (err) => this.confirmDialog.alert(err.error?.message || 'Erreur lors de la création'),
       });
   }
 
   deleteProject(project: Project) {
-    const confirmed = confirm(
-      `Voulez-vous vraiment supprimer le projet "${project.title}" ?\nLes tâches associées ne seront pas supprimées mais détachées.`
-    );
-    if (!confirmed) return;
-
-    this.projectsService.remove(project.id).subscribe({
-      next: () => {
-        this.projects = this.projects.filter((p) => p.id !== project.id);
-        this.taskSelectionService.notifyProjectDeleted(project.id);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        alert(err.error?.message || 'Erreur lors de la suppression du projet');
-      },
+    this.confirmDialog.open({
+      title: 'Supprimer le projet',
+      message: `Voulez-vous vraiment supprimer le projet "${project.title}" ? Les tâches associées seront détachées.`,
+      confirmLabel: 'Supprimer',
+      danger: true,
+    }).subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.projectsService.remove(project.id).subscribe({
+        next: () => {
+          this.projects = this.projects.filter((p) => p.id !== project.id);
+          this.taskSelectionService.notifyProjectDeleted(project.id);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.confirmDialog.alert(err.error?.message || 'Erreur lors de la suppression du projet');
+        },
+      });
     });
   }
 }

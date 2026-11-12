@@ -129,10 +129,26 @@ describe('TasksService', () => {
   });
 
   describe('updateStatus', () => {
-    it('should reject invalid status transition TODO -> DONE', async () => {
+    it('should reject invalid status transition DONE -> BLOCKED', async () => {
+      prisma.task.findUnique.mockResolvedValue({
+        ...baseTask,
+        status: TaskStatus.DONE,
+      });
       await expect(
-        service.updateStatus(userId, taskId, { status: TaskStatus.DONE }),
+        service.updateStatus(userId, taskId, { status: TaskStatus.BLOCKED }),
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should allow valid transition TODO -> DONE', async () => {
+      prisma.task.findUnique.mockResolvedValue(baseTask);
+      prisma.task.update.mockResolvedValue({
+        ...baseTask,
+        status: TaskStatus.DONE,
+      });
+      const result = await service.updateStatus(userId, taskId, {
+        status: TaskStatus.DONE,
+      });
+      expect(result.status).toBe(TaskStatus.DONE);
     });
 
     it('should allow valid transition TODO -> IN_PROGRESS', async () => {

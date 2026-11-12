@@ -13,13 +13,21 @@ import { Prisma, TaskStatus, TaskPriority } from '@prisma/client';
 
 // Règles de transition autorisées entre statuts
 const ALLOWED_STATUS_TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
-  [TaskStatus.TODO]: [TaskStatus.IN_PROGRESS, TaskStatus.BLOCKED],
+  [TaskStatus.TODO]: [
+    TaskStatus.IN_PROGRESS,
+    TaskStatus.BLOCKED,
+    TaskStatus.DONE,
+  ],
   [TaskStatus.IN_PROGRESS]: [
     TaskStatus.DONE,
     TaskStatus.BLOCKED,
     TaskStatus.TODO,
   ],
-  [TaskStatus.BLOCKED]: [TaskStatus.TODO, TaskStatus.IN_PROGRESS],
+  [TaskStatus.BLOCKED]: [
+    TaskStatus.TODO,
+    TaskStatus.IN_PROGRESS,
+    TaskStatus.DONE,
+  ],
   [TaskStatus.DONE]: [TaskStatus.TODO, TaskStatus.IN_PROGRESS],
 };
 

@@ -11,6 +11,7 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 // Shared
 import { IconComponent } from './shared/components/icon/icon.component';
+import { ConfirmDialogComponent } from './shared/components/confirm-dialog/confirm-dialog.component';
 import { FcfaPipe } from './shared/pipes/fcfa.pipe';
 
 // Layout
@@ -33,6 +34,7 @@ import { RegisterComponent } from './features/auth/register/register.component';
   declarations: [
     App,
     IconComponent,
+    ConfirmDialogComponent,
     FcfaPipe,
     SidebarComponent,
     HeaderComponent,
