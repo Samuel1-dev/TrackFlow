@@ -1,23 +1,23 @@
-  import { Injectable, signal, computed } from '@angular/core';
-  import { HttpClient } from '@angular/common/http';
-  import { Observable, tap, catchError, of } from 'rxjs';
-  import { Router } from '@angular/router';
-  import {
-    User,
-    AuthResponse,
-    LoginDto,
-    RegisterDto,
-    VerifyEmailRegisterDto,
-    ResetPasswordDto,
-  } from '../models/auth.models';
+import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap, catchError, of } from 'rxjs';
+import { Router } from '@angular/router';
+import {
+  User,
+  AuthResponse,
+  LoginDto,
+  RegisterDto,
+  VerifyEmailRegisterDto,
+  ResetPasswordDto,
+} from '../models/auth.models';
 import { environment } from '../../../environments/environment';
 
-  @Injectable({
-    providedIn: 'root',
-  })
-  export class AuthService {
+@Injectable({
+  providedIn: 'root',
+})
+export class AuthService {
   private readonly baseUrl = environment.apiUrl;
-    private readonly tokenKey = 'taskflow_access_token';
+  private readonly tokenKey = 'taskflow_access_token';
     private readonly refreshKey = 'taskflow_refresh_token';
     private readonly userKey = 'taskflow_user';
 

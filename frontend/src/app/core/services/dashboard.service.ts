@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class DashboardService {
-   private readonly baseUrl = environment.apiUrl;
+  private readonly baseUrl = `${environment.apiUrl}/dashboard`;
   constructor(private http: HttpClient) {}
 
   getSummary(): Observable<DashboardSummary> {

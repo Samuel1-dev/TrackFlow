@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class SearchService {
-   private readonly baseUrl = environment.apiUrl;
+   private readonly baseUrl = `${environment.apiUrl}/search`;
 
   constructor(private http: HttpClient) {}
 

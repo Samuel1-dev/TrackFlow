@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class NotificationService {
-   private readonly baseUrl = environment.apiUrl;
+   private readonly baseUrl = `${environment.apiUrl}/notifications`;
 
   private notificationsSubject = new BehaviorSubject<SystemNotification[]>([]);
   public readonly notifications$ = this.notificationsSubject.asObservable();
