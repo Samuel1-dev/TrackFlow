@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Task, CreateTaskDto, TaskStatus, WeeklyStats, TimeLog } from '../models/task.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TasksService {
-  private readonly baseUrl = 'http://localhost:3000/api/v1/tasks';
-
+  private readonly baseUrl = environment.apiUrl;
   constructor(private http: HttpClient) {}
 
   findAll(filters?: {

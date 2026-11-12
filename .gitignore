@@ -5,6 +5,9 @@
 
 # Database local storage
 .pgdata/
+*.db
+*.db-journal
+*.sqlite
 
 # Node dependencies & logs
 node_modules/

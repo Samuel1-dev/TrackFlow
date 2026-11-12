@@ -294,8 +294,8 @@ export class TasksService {
       ...(filters.noProject && { projectId: null }),
       ...(filters.search && {
         OR: [
-          { title: { contains: filters.search, mode: 'insensitive' } },
-          { description: { contains: filters.search, mode: 'insensitive' } },
+          { title: { contains: filters.search } },
+          { description: { contains: filters.search } },
         ],
       }),
       ...(filters.isOverdue && {
@@ -378,7 +378,6 @@ export class TasksService {
             taskId: id,
             dependsOnTaskId: depId,
           })),
-          skipDuplicates: true,
         });
       }
     }

@@ -107,8 +107,8 @@ export class SearchService {
           where: {
             userId,
             OR: [
-              { title: { contains: rawQuery, mode: 'insensitive' } },
-              { description: { contains: rawQuery, mode: 'insensitive' } },
+              { title: { contains: rawQuery } },
+              { description: { contains: rawQuery } },
             ],
           },
           select: {
@@ -133,8 +133,8 @@ export class SearchService {
           where: {
             userId,
             OR: [
-              { title: { contains: rawQuery, mode: 'insensitive' } },
-              { description: { contains: rawQuery, mode: 'insensitive' } },
+              { title: { contains: rawQuery } },
+              { description: { contains: rawQuery } },
             ],
           },
           select: {
@@ -157,9 +157,9 @@ export class SearchService {
           where: {
             userId,
             OR: [
-              { description: { contains: rawQuery, mode: 'insensitive' } },
+              { description: { contains: rawQuery } },
               {
-                category: { name: { contains: rawQuery, mode: 'insensitive' } },
+                category: { name: { contains: rawQuery } },
               },
             ],
           },

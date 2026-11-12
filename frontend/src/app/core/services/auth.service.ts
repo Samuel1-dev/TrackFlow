@@ -10,12 +10,13 @@ import {
   VerifyEmailRegisterDto,
   ResetPasswordDto,
 } from '../models/auth.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:3000/api/v1';
+  private readonly baseUrl = environment.apiUrl;
   private readonly tokenKey = 'taskflow_access_token';
   private readonly refreshKey = 'taskflow_refresh_token';
   private readonly userKey = 'taskflow_user';

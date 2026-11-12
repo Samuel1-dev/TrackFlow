@@ -7,12 +7,13 @@ import {
   NotificationResponse,
   SystemNotification,
 } from '../models/notification.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotificationService {
-  private readonly baseUrl = 'http://localhost:3000/api/v1/notifications';
+   private readonly baseUrl = environment.apiUrl;
 
   private notificationsSubject = new BehaviorSubject<SystemNotification[]>([]);
   public readonly notifications$ = this.notificationsSubject.asObservable();

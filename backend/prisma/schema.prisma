@@ -1,11 +1,10 @@
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 enum TaskStatus {
@@ -39,7 +38,7 @@ model User {
   passwordHash String
   firstName    String
   lastName     String
-  refreshHash String? 
+  refreshHash  String?
   timezone     String         @default("UTC")
   currency     String         @default("XOF")
   createdAt    DateTime       @default(now())
@@ -142,8 +141,8 @@ model Budget {
   periodType    BudgetPeriodType
   startDate     DateTime
   endDate       DateTime
-  initialAmount Decimal          @db.Decimal(14, 2)
-  savingsTarget Decimal          @db.Decimal(14, 2)
+  initialAmount Decimal
+  savingsTarget Decimal
   currency      String           @default("XOF")
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
@@ -174,7 +173,7 @@ model Expense {
   id          String          @id @default(uuid())
   userId      String
   categoryId  String
-  amount      Decimal         @db.Decimal(14, 2)
+  amount      Decimal
   date        DateTime
   description String?
   createdAt   DateTime        @default(now())

@@ -6,13 +6,13 @@ import {
   Expense,
   ExpenseCategory,
 } from '../models/finance.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FinanceService {
-  private readonly baseUrl = 'http://localhost:3000/api/v1/finance';
-
+  private readonly baseUrl = environment.apiUrl;
   constructor(private http: HttpClient) {}
 
   getActiveBudget(): Observable<ActiveBudgetResponse> {

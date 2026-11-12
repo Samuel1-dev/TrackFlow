@@ -69,7 +69,7 @@ export class ExpensesService {
           date: { gte: new Date(filters.from), lte: new Date(filters.to) },
         }),
       ...(filters.search && {
-        description: { contains: filters.search, mode: 'insensitive' },
+        description: { contains: filters.search },
       }),
     };
 
