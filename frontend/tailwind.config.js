@@ -26,10 +26,17 @@ module.exports = {
           dark: '#0b0f19',
           cardDark: '#131b2e',
           borderDark: '#1e293b',
+        },
+        finovia: {
+          header: '#0f2756',
+          sidebar: '#0c2044',
+          sidebarHover: '#16356e',
+          sidebarActive: 'rgba(255, 255, 255, 0.16)',
+          border: 'rgba(255, 255, 255, 0.12)',
         }
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Roboto', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(99, 102, 241, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
