@@ -12,7 +12,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class FinanceService {
-  private readonly baseUrl = environment.apiUrl;
+  private readonly baseUrl = `${environment.apiUrl}/finance`;
   constructor(private http: HttpClient) {}
 
   getActiveBudget(): Observable<ActiveBudgetResponse> {
