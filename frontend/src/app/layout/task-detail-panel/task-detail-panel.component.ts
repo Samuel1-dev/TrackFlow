@@ -15,6 +15,8 @@ import { ConfirmDialogService } from '../../shared/services/confirm-dialog.servi
 })
 export class TaskDetailPanelComponent implements OnInit, OnDestroy {
   logMinutes: number = 30;
+  newSubtaskTitle: string = '';
+  isAddingSubtask: boolean = false;
   activeBudget: ActiveBudget | null = null;
   private subs: Subscription = new Subscription();
 
@@ -29,14 +31,31 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadActiveBudget();
 
-    // Recharger le budget dès qu'un budget est créé ou une dépense ajoutée
+    // Recharger le budget en temps réel sur création, modification ou suppression de budget/dépense
     this.subs.add(
       this.taskSelectionService.budgetCreated$.subscribe(() => {
         this.loadActiveBudget();
       }),
     );
     this.subs.add(
+      this.taskSelectionService.budgetUpdated$.subscribe(() => {
+        this.loadActiveBudget();
+      }),
+    );
+    this.subs.add(
+      this.taskSelectionService.budgetDeleted$.subscribe(() => {
+        this.activeBudget = null;
+        this.cdr.detectChanges();
+        this.loadActiveBudget();
+      }),
+    );
+    this.subs.add(
       this.taskSelectionService.expenseCreated$.subscribe(() => {
+        this.loadActiveBudget();
+      }),
+    );
+    this.subs.add(
+      this.taskSelectionService.expenseDeleted$.subscribe(() => {
         this.loadActiveBudget();
       }),
     );
@@ -53,10 +72,12 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
   loadActiveBudget() {
     this.financeService.getActiveBudget().subscribe({
       next: (res) => {
-        if (res && res.activeBudget) {
-          this.activeBudget = res.activeBudget;
-          this.cdr.detectChanges();
-        }
+        this.activeBudget = res && res.activeBudget ? res.activeBudget : null;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.activeBudget = null;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -102,6 +123,37 @@ export class TaskDetailPanelComponent implements OnInit, OnDestroy {
         }
       },
     });
+  }
+
+  addSubtask(parentTaskId: string) {
+    const title = this.newSubtaskTitle.trim();
+    if (!title) return;
+
+    const current = this.task();
+    this.isAddingSubtask = true;
+
+    this.tasksService
+      .create({
+        title,
+        parentTaskId,
+        projectId: current?.projectId || undefined,
+        status: 'TODO',
+      })
+      .subscribe({
+        next: () => {
+          this.newSubtaskTitle = '';
+          this.isAddingSubtask = false;
+          this.tasksService.findOne(parentTaskId).subscribe((fresh) => {
+            this.taskSelectionService.updateSelectedTask(fresh);
+            this.taskSelectionService.notifyTaskUpdated(fresh);
+            this.cdr.detectChanges();
+          });
+        },
+        error: (err) => {
+          this.isAddingSubtask = false;
+          this.confirmDialog.alert(err.error?.message || "Erreur lors de l'ajout de la sous-tâche");
+        },
+      });
   }
 
   addTime(taskId: string) {

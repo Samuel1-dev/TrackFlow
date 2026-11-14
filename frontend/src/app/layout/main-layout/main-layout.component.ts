@@ -5,6 +5,7 @@ import { TasksService } from '../../core/services/tasks.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { FinanceService } from '../../core/services/finance.service';
 import { Project } from '../../core/models/project.models';
+import { Task } from '../../core/models/task.models';
 import { ExpenseCategory } from '../../core/models/finance.models';
 import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 
@@ -19,12 +20,14 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   projects: Project[] = [];
   categories: ExpenseCategory[] = [];
+  allTasks: Task[] = [];
   private subs: Subscription = new Subscription();
 
   newTask = {
     title: '',
     description: '',
     projectId: undefined as string | undefined,
+    parentTaskId: undefined as string | undefined,
     priority: 'NORMAL' as any,
     dueDate: '',
     estimatedMinutes: 60,
@@ -104,6 +107,25 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }),
     );
+
+    this.subs.add(
+      this.taskSelectionService.taskCreated$.subscribe(() => {
+        this.tasksService.findAll().subscribe((res) => {
+          this.allTasks = res.filter((t) => !t.parentTaskId);
+          this.cdr.detectChanges();
+        });
+      }),
+    );
+
+    this.subs.add(
+      this.taskSelectionService.taskDeleted$.subscribe((deletedId) => {
+        this.allTasks = this.allTasks.filter((t) => t.id !== deletedId);
+        if (this.newTask.parentTaskId === deletedId) {
+          this.newTask.parentTaskId = undefined;
+        }
+        this.cdr.detectChanges();
+      }),
+    );
   }
 
   ngOnDestroy() {
@@ -113,6 +135,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   loadDependencies() {
     this.projectsService.findAll().subscribe((res) => {
       this.projects = res;
+      this.cdr.detectChanges();
+    });
+    this.tasksService.findAll().subscribe((res) => {
+      this.allTasks = res.filter((t) => !t.parentTaskId);
       this.cdr.detectChanges();
     });
     this.financeService.getCategories().subscribe((res) => {
@@ -131,6 +157,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         title: this.newTask.title,
         description: this.newTask.description,
         projectId: this.newTask.projectId,
+        parentTaskId: this.newTask.parentTaskId || undefined,
         priority: this.newTask.priority,
         dueDate: this.newTask.dueDate ? new Date(this.newTask.dueDate).toISOString() : undefined,
         estimatedMinutes: this.newTask.estimatedMinutes,
@@ -142,6 +169,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
           this.taskSelectionService.selectTask(created);
           this.newTask.title = '';
           this.newTask.description = '';
+          this.newTask.parentTaskId = undefined;
           this.cdr.detectChanges();
         },
         error: (err) => this.confirmDialog.alert(err.error?.message || 'Erreur lors de la création'),

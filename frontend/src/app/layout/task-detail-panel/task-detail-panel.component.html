@@ -131,13 +131,19 @@
       }
 
       <!-- Subtasks Section -->
-      @if (currentTask.subTasks && currentTask.subTasks.length > 0) {
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Sous-tâches ({{ getSubtasksDoneCount(currentTask) }}/{{ currentTask.subTasks.length }})
-            </p>
-          </div>
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between">
+          <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Sous-tâches
+            @if (currentTask.subTasks && currentTask.subTasks.length > 0) {
+              ({{ getSubtasksDoneCount(currentTask) }}/{{ currentTask.subTasks.length }})
+            } @else {
+              (0)
+            }
+          </p>
+        </div>
+
+        @if (currentTask.subTasks && currentTask.subTasks.length > 0) {
           <div class="space-y-1.5">
             @for (sub of currentTask.subTasks; track sub.id) {
               <div class="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 group/sub">
@@ -145,9 +151,15 @@
                   type="checkbox"
                   [checked]="sub.status === 'DONE'"
                   (change)="toggleSubtask(sub)"
-                  class="rounded text-brand-600 focus:ring-brand-500 h-4 w-4 shrink-0"
+                  class="rounded text-brand-600 focus:ring-brand-500 h-4 w-4 shrink-0 cursor-pointer"
                 />
-                <span class="text-xs font-medium text-slate-700 dark:text-slate-200 flex-1 truncate" [class.line-through]="sub.status === 'DONE'">
+                <span
+                  class="text-xs font-medium flex-1 truncate"
+                  [class.line-through]="sub.status === 'DONE'"
+                  [class.text-slate-400]="sub.status === 'DONE'"
+                  [class.text-slate-700]="sub.status !== 'DONE'"
+                  [class.dark:text-slate-200]="sub.status !== 'DONE'"
+                >
                   {{ sub.title }}
                 </span>
                 <button
@@ -160,8 +172,31 @@
               </div>
             }
           </div>
-        </div>
-      }
+        } @else {
+          <p class="text-xs text-slate-400 italic">Aucune sous-tâche pour le moment.</p>
+        }
+
+        <!-- Quick Add Subtask Input Form -->
+        <form (ngSubmit)="addSubtask(currentTask.id)" class="flex items-center gap-2 pt-1">
+          <input
+            type="text"
+            [(ngModel)]="newSubtaskTitle"
+            name="newSubtaskTitle"
+            placeholder="Ajouter une sous-tâche (Entrée)..."
+            [disabled]="isAddingSubtask"
+            class="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+          />
+          <button
+            type="submit"
+            [disabled]="!newSubtaskTitle.trim() || isAddingSubtask"
+            class="py-1.5 px-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs rounded-xl transition-colors flex items-center justify-center gap-1 shrink-0"
+            title="Ajouter la sous-tâche"
+          >
+            <app-icon name="plus" [size]="12"></app-icon>
+            <span>Ajouter</span>
+          </button>
+        </form>
+      </div>
 
       <!-- Time Tracking (Suivi du Temps Réel) -->
       <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-indigo-50/40 dark:from-slate-800/60 dark:to-slate-800/20 border border-slate-100 dark:border-slate-700 space-y-3">
@@ -235,7 +270,12 @@
         </div>
 
         <div class="mb-6">
-          <p class="text-xs text-slate-400 mb-1">Budget Restant Actif</p>
+          <div class="flex items-center justify-between mb-1">
+            <p class="text-xs text-slate-400">Budget Restant Actif</p>
+            @if (!activeBudget) {
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-white/10 text-slate-300">Aucun budget actif</span>
+            }
+          </div>
           <h3 class="text-2xl font-black tracking-tight text-white">
             {{ (activeBudget?.remainingBudget || 0) | fcfa }}
           </h3>
@@ -271,7 +311,11 @@
           ></div>
         </div>
         <p class="text-[11px] text-slate-500 dark:text-slate-400">
-          Épargne estimée actuelle : <strong>{{ (activeBudget?.estimatedSavings || 0) | fcfa }}</strong>
+          @if (activeBudget) {
+            Épargne estimée actuelle : <strong>{{ (activeBudget.estimatedSavings || 0) | fcfa }}</strong>
+          } @else {
+            Aucun budget actif défini pour la période.
+          }
         </p>
       </div>
 
