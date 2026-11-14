@@ -36,3 +36,9 @@ Thumbs.db
 # Coverage and test output
 coverage/
 *.lcov
+
+# Seed de données de démo (ne pas committer les données sensibles)
+backend/prisma/seed.ts
+backend/prisma/seed.js
+prisma/seed.ts
+prisma/seed.js

@@ -23,7 +23,7 @@
             Budget Actif ({{ activeBudget.periodType }})
           </span>
           <p class="text-xs text-slate-400 mt-1">
-            Du {{ activeBudget.startDate | date:'dd MMM yyyy' }} au {{ activeBudget.endDate | date:'dd MMM yyyy' }}
+            Du {{ activeBudget.startDate | date:'dd/MM/yyyy' }} au {{ activeBudget.endDate | date:'dd/MM/yyyy' }}
           </p>
         </div>
 
@@ -142,7 +142,7 @@
               <p class="text-xs font-bold text-slate-900 dark:text-white flex items-center flex-wrap">
                 <span>Budget {{ item.periodType }}</span>
                 <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 inline-block mx-1.5"></span>
-                <span>{{ item.startDate | date:'dd MMM' }} - {{ item.endDate | date:'dd MMM yyyy' }}</span>
+                <span>{{ item.startDate | date:'dd/MM/yyyy' }} - {{ item.endDate | date:'dd/MM/yyyy' }}</span>
               </p>
               <span class="text-[10px] text-slate-400 flex items-center flex-wrap mt-0.5">
                 <span>Initial: {{ item.initialAmount | fcfa }}</span>

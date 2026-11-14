@@ -46,7 +46,7 @@ export class NotificationsService {
         'fr-FR',
         {
           day: '2-digit',
-          month: 'short',
+          month: '2-digit',
           year: 'numeric',
         },
       );

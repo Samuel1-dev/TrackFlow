@@ -69,7 +69,6 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  // Alwaysdata fournit PORT et IP ; valeurs par défaut pour le développement local
   const port = Number(process.env.PORT) || 3000;
   const host = process.env.IP || '127.0.0.1';
   await app.listen(port, host);

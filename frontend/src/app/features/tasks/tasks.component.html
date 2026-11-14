@@ -167,7 +167,7 @@
                     <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></span>
                   }
                   @if (task.dueDate) {
-                    <span class="shrink-0">Échéance: {{ task.dueDate | date:'dd MMM yyyy' }}</span>
+                    <span class="shrink-0">Échéance: {{ task.dueDate | date:'dd/MM/yyyy' }}</span>
                     <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></span>
                   }
                   <span class="shrink-0">Estimé: {{ task.estimatedMinutes }} min</span>
